@@ -3237,4 +3237,4 @@ try:
     else:
         logging.warning("Problemas con el interprete de python %s", "INT001")
 except:
-    logging.warning("Error fatal %s", "ERR000")
+    logging.warning("Error fatal %s", "ERR001")
