@@ -3153,8 +3153,9 @@ try:
                     self.lineEditPwd.setText("")
 
             def account(self):
-                app = InicioLayout()
-                self.nextWindow.append(app)
+                # app = InicioLayout()
+                # self.nextWindow.append(app)
+                QMessageBox.information(self, "Aviso", "No disponible")
         # <> fin Login
 
 
