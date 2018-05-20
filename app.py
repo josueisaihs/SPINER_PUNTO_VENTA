@@ -585,9 +585,9 @@ try:
                 text = self.read(file)
                 return valor in text
 
-            def genLic(self, request, dias, format=True):
+            def genLic(self, request, dias, format=True, forLic=True):
                 if dias <= 367:
-                    if self.verifRequest(forLic=True, requestRef=request)[0]:
+                    if self.verifRequest(forLic=forLic, requestRef=request)[0]:
                         key = bytes(self.filtre(request), "UTF-8")
                         if format:
                             return self.formatCode("{}".format(dias), key=key)
@@ -606,7 +606,8 @@ try:
                         requestRef = requestRef[-2].split("g")[1]
                         if self.verifRequest(requestRef=requestRef)[0]:
                             for i in range(367):
-                                if self.comparaDigest(licenceRef, self.genLic(requestRef, i, format=False)):
+                                if self.comparaDigest(licenceRef,
+                                                      self.genLic(requestRef, i, format=False, forLic=False)):
                                     return True, i
                             return False, 0
                         else:
@@ -2506,7 +2507,7 @@ try:
                 self.totalCUPDoubleSpinBox.setValue(saldo * 25)
 
             def buscarClient(self):
-                dialog = DialogClientLayout()
+                dialog = DialogClientLayout(False)
                 dialog.user = self.user
                 if dialog.exec_():
                     self.clienteLabel_2.setText(dialog.client[0][0])
@@ -2582,7 +2583,7 @@ try:
 
 
         class DialogClientLayout(QDialog, dialogClientUi, SQL):
-            def __init__(self):
+            def __init__(self, inicio=True):
                 super(DialogClientLayout, self).__init__()
                 self.setupUi(self)
                 SQL.__init__(self)
@@ -2592,6 +2593,8 @@ try:
                 self.setWindowIcon(QIcon(os.path.join("system", "image", "icono.png")))
 
                 self.loadTabla()
+
+                self.isInicio = True
 
                 self.connection()
 
@@ -2616,11 +2619,21 @@ try:
                     self.loadTabla()
 
             def clientSelect(self, item):
-                client = self.clientQuery(SELECT="client, phone, discount", QUERY=" AND client == '{}'".
+                client = self.clientQuery(SELECT="client, phone, discount, address, email", QUERY=" AND client == '{}'".
                                           format(item.text(0)))
                 self.client = client
 
-                self.accept()
+                if not self.isInicio:
+                    self.accept()
+                else:
+                    dialog = DialogNewClientLayout(False)
+                    dialog.nombreLineEdit.setText(client[0][0])
+                    dialog.telefonoLineEdit.setText(client[0][1])
+                    dialog.descuentoDoubleSpinBox.setValue(client[0][2])
+                    dialog.direccionLineEdit.setText(client[0][3])
+                    dialog.emailLineEdit.setText(client[0][4])
+                    if dialog.exec_():
+                        pass
 
             def newClient(self):
                 dialog = DialogNewClientLayout()
@@ -2630,7 +2643,7 @@ try:
 
 
         class DialogNewClientLayout(QDialog, dialogNewClientUi, SQL):
-            def __init__(self):
+            def __init__(self, editable=True):
                 super(DialogNewClientLayout, self).__init__()
                 self.setupUi(self)
                 SQL.__init__(self)
@@ -2638,6 +2651,7 @@ try:
                 self.setWindowIcon(QIcon(os.path.join("system", "image", "icono.png")))
 
                 self.okPushButton.hide()
+                self.editable = editable
 
                 self.connect()
 
@@ -2647,7 +2661,7 @@ try:
                 self.cancelPushButton.clicked.connect(self.cancel)
 
             def nombre(self, txt):
-                if txt.__len__() > 5:
+                if txt.__len__() > 5 and self.editable:
                     self.okPushButton.show()
                 else:
                     self.okPushButton.hide()
