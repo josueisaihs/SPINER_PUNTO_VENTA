@@ -2666,8 +2666,6 @@ try:
             def print(self):
                 self.action = self.actionPrint
                 self.accept()
-
-
         # <> fin DialogList
 
 
