@@ -2634,6 +2634,12 @@ try:
                     dialog.descuentoDoubleSpinBox.setValue(client[0][2])
                     dialog.direccionLineEdit.setText(client[0][3])
                     dialog.emailLineEdit.setText(client[0][4])
+
+                    dialog.nombreLineEdit.setReadOnly(True)
+                    dialog.telefonoLineEdit.setReadOnly(True)
+                    dialog.descuentoDoubleSpinBox.setReadOnly(True)
+                    dialog.direccionLineEdit.setReadOnly(True)
+                    dialog.emailLineEdit.setReadOnly(True)
                     if dialog.exec_():
                         pass
 
@@ -2714,11 +2720,18 @@ try:
             def showFacturas(self):
                 dialog = DialogCalendarLayout()
                 if dialog.exec_():
-                    fechas = dialog.getDay()
-                    lista = self.queryFree(SELECT="El.time, I.invoice, ",
-                                           FROM="",
-                                           QUERY="")
-                    dialogList = DialogList(["Col 1", "Col 2"], [[3, 4], [5, 6]])
+                    date = dialog.getDay()
+                    fecha0 = datetime.date(year=date[0].year(), month=date[0].month(), day=date[0].day())
+                    fecha1 = datetime.date(year=date[1].year(), month=date[1].month(), day=date[1].day())
+                    lista = self.queryFree(SELECT="El.time, I.type, S.discount, round(D.dep - D.money, 2), S.total",
+                                           FROM="EventsLog El, Invoices I, Clients Cl, Sales S, Debt D",
+                                           QUERY="S.id_invoice == I.id AND S.id_client == Cl.id "
+                                                 "AND D.id_client == Cl.id AND D.id_invoice == I.id "
+                                                 "AND I.id_event == El.id_event AND El.time >= '{} 00:00:00' AND "
+                                                 "El.time <= '{} 23:59:59' AND Cl.client == '{}'".
+                                           format(fecha0.isoformat(), fecha1.isoformat(), self.nombreLineEdit.text()))
+                    header = ["Fecha", "Factura", "Descuento", "Deuda", "Total"]
+                    dialogList = DialogList(header, lista)
                     if dialogList.exec_():
                         pass
         # <> fin DialogNewClientLayout

@@ -215,8 +215,17 @@
                 </rect>
             </property>
             <property name="alternatingRowColors">
+                <bool>false</bool>
+            </property>
+            <property name="wordWrap">
                 <bool>true</bool>
             </property>
+            <attribute name="headerMinimumSectionSize">
+                <number>60</number>
+            </attribute>
+            <attribute name="headerStretchLastSection">
+                <bool>false</bool>
+            </attribute>
             <column>
                 <property name="text">
                     <string notr="true">1</string>
