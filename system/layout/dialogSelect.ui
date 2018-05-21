@@ -1,0 +1,679 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+    <class>Dialog</class>
+    <widget class="QDialog" name="Dialog" key="87e7a35ef3c9941faaaef534d4812657">
+        <property name="geometry">
+            <rect>
+                <x>0</x>
+                <y>0</y>
+                <width>951</width>
+                <height>631</height>
+            </rect>
+        </property>
+        <property name="windowTitle">
+            <string>Detalles</string>
+        </property>
+        <property name="styleSheet">
+            <string notr="true">QMainWindow, QDialog{
+                background-color: rgb(255, 255, 255);
+                }
+
+                /**** QPushButton (enabled) ****/
+                QPushButton
+                {
+                background-color: rgb(85, 170, 255);
+                font: 10pt;
+                color: rgb(255, 255, 255);
+                padding: 4px 8px;
+                border: 2px solid rgb(85, 170, 255);
+                border-radius: 8px;
+                padding: 5px;
+                }
+
+                QPushButton:hover
+                {
+                background-color: rgb(0, 121, 182);
+                border: 2px solid rgb(66, 133, 199);
+                }
+
+                QPushButton:pressed
+                {
+                border:3px solid rgb(66, 133, 199);
+                padding: -1px 1px 1px 1px;
+                }
+
+                /******* QLabel ***********/
+                QLabel{
+                color: rgb(120, 120, 120)
+                }
+                labelHab1:hover{
+                color: rgb(120, 0, 0)
+                }
+
+                /*******QLineEdit************/
+                QTextEdit {
+                font: 10pt;
+                color: rgb(120, 120, 120);
+                border: 1px solid rgb(156, 156, 156);
+                border-radius: 0px;
+                padding: 2px;
+                }
+                QLineEdit, QDateEdit, QDoubleSpinBox, QSpinBox{
+                font: 10pt;
+                color: rgb(120, 120, 120);
+                border: 1px solid rgb(156, 156, 156);
+                border-radius: 0px;
+                padding: 2px;
+                border-top: 1px white;
+                border-left: 1px white;
+                border-right: 1px white;
+                }
+                /********QComboBox*******/
+                QComboBox{
+                font: 10pt;
+                color: rgb(120, 120, 120);
+                border: 1px solid rgb(156, 156, 156);
+                padding: 2px;
+                selection-background-color: white;
+                selection-color: rgb(120, 120, 120);
+                border-top: 1px white;
+                border-left: 1px white;
+                border-right: 1px white;
+                }
+                QComboBox QAbstractItemView
+                {
+                background-color: white;
+                color:rgb(120, 120, 120);
+                padding: 4px;
+                border: 1px solid rgb(156, 156, 156);
+                border-top: 1px white;
+                border-left: 1px white;
+                border-right: 1px white;
+                }
+
+                QLineEdit:hover, QDateEdit:hover, QDoubleSpinBox:hover, QComboBox:hover
+                {
+                color: rgb(85, 170, 255);
+                border: 1px solid rgb(85, 170, 255);
+                border-top: 1px white;
+                border-left: 1px white;
+                border-right: 1px white;
+                }
+
+                QLineEdit:focus, QDateEdit:focus, QDoubleSpinBox:focus, QComboBox:focus
+                {
+                border-color: rgb(90,200,255);
+                border-top: 1px white;
+                border-left: 1px white;
+                border-right: 1px white;
+                }
+
+                QToolTip
+                {
+                background-color:rgb(85, 170, 255);
+                color: white;
+                border: 1px solid rgb(85, 170, 255);
+                opacity: 50;
+                padding: 1px;
+                }
+                QTabWidget
+                {
+                background-color: transparent;
+                }
+
+                QTabWidget::pane {
+                border-top: 1px solid rgb(156, 156, 156);
+                border-bottom: 1px solid rgb(156, 156, 156);
+                position: absolute;
+                top: -0.25em;
+                }
+                /**** QTabWidget (disabled) ****/
+                QTabWidget::pane:disabled
+                {
+                border-color: rgb(60,60,60);
+                }
+
+                QTabWidget::tab-bar {
+                alignment: center;
+                border: 1px white;
+                border-radius: 5px;
+                }
+
+                QTreeView
+                {
+                alternate-background-color: rgb(200,200,200);
+                background-color: white;
+                border: 1px solid rgb(156, 156, 156);
+                font: 10pt;
+                color: rgb(120,120,120);
+                selection-background-color:rgb(90,200,255);
+                selection-color: rgb(156, 156, 156);
+                }
+                QListView{
+                alternate-background-color: rgb(200,200,200);
+                background-color: white;
+                border: 1px solid rgb(255, 255, 255);
+                font: 8pt;
+                color: rgb(120,120,120);
+                selection-background-color:rgb(90,200,255);
+                selection-color: rgb(156, 156, 156);
+                }
+            </string>
+        </property>
+        <widget class="QWidget" name="formLayoutWidget">
+            <property name="geometry">
+                <rect>
+                    <x>10</x>
+                    <y>10</y>
+                    <width>316</width>
+                    <height>611</height>
+                </rect>
+            </property>
+            <layout class="QFormLayout" name="formLayout">
+                <property name="fieldGrowthPolicy">
+                    <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+                </property>
+                <item row="0" column="0">
+                    <widget class="QLabel" name="categoriaLabel">
+                        <property name="text">
+                            <string>Categoria</string>
+                        </property>
+                    </widget>
+                </item>
+                <item row="0" column="1">
+                    <layout class="QHBoxLayout" name="horizontalLayout_3">
+                        <item>
+                            <widget class="QLineEdit" name="categoriaLineEdit">
+                                <property name="readOnly">
+                                    <bool>true</bool>
+                                </property>
+                            </widget>
+                        </item>
+                    </layout>
+                </item>
+                <item row="1" column="0">
+                    <widget class="QLabel" name="codigoLabel">
+                        <property name="text">
+                            <string>Codigo</string>
+                        </property>
+                    </widget>
+                </item>
+                <item row="1" column="1">
+                    <widget class="QLineEdit" name="codigoLineEdit">
+                        <property name="inputMask">
+                            <string/>
+                        </property>
+                        <property name="maxLength">
+                            <number>20</number>
+                        </property>
+                        <property name="readOnly">
+                            <bool>true</bool>
+                        </property>
+                        <property name="placeholderText">
+                            <string>Introduzca el codigo</string>
+                        </property>
+                    </widget>
+                </item>
+                <item row="2" column="0">
+                    <widget class="QLabel" name="modeloLabel">
+                        <property name="text">
+                            <string>Modelo</string>
+                        </property>
+                    </widget>
+                </item>
+                <item row="2" column="1">
+                    <widget class="QLineEdit" name="modeloLineEdit">
+                        <property name="inputMask">
+                            <string/>
+                        </property>
+                        <property name="readOnly">
+                            <bool>true</bool>
+                        </property>
+                        <property name="placeholderText">
+                            <string>Aquí aparecerá el modelo</string>
+                        </property>
+                    </widget>
+                </item>
+                <item row="3" column="0">
+                    <widget class="QLabel" name="costoLabel">
+                        <property name="text">
+                            <string>Costo</string>
+                        </property>
+                    </widget>
+                </item>
+                <item row="3" column="1">
+                    <widget class="QDoubleSpinBox" name="costoDoubleSpinBox">
+                        <property name="readOnly">
+                            <bool>true</bool>
+                        </property>
+                        <property name="maximum">
+                            <double>2000.000000000000000</double>
+                        </property>
+                    </widget>
+                </item>
+                <item row="4" column="0">
+                    <widget class="QLabel" name="preciosLabel">
+                        <property name="text">
+                            <string>Precios</string>
+                        </property>
+                    </widget>
+                </item>
+                <item row="4" column="1">
+                    <layout class="QFormLayout" name="formLayout_2">
+                        <item row="0" column="0">
+                            <widget class="QLabel" name="p1Label">
+                                <property name="text">
+                                    <string>P1</string>
+                                </property>
+                            </widget>
+                        </item>
+                        <item row="0" column="1">
+                            <widget class="QDoubleSpinBox" name="p1DoubleSpinBox">
+                                <property name="readOnly">
+                                    <bool>true</bool>
+                                </property>
+                                <property name="maximum">
+                                    <double>20000.000000000000000</double>
+                                </property>
+                            </widget>
+                        </item>
+                        <item row="1" column="0">
+                            <widget class="QLabel" name="p2Label">
+                                <property name="text">
+                                    <string>P2</string>
+                                </property>
+                            </widget>
+                        </item>
+                        <item row="1" column="1">
+                            <widget class="QDoubleSpinBox" name="p2DoubleSpinBox">
+                                <property name="readOnly">
+                                    <bool>true</bool>
+                                </property>
+                                <property name="maximum">
+                                    <double>20000.000000000000000</double>
+                                </property>
+                            </widget>
+                        </item>
+                        <item row="3" column="0">
+                            <widget class="QLabel" name="p4Label">
+                                <property name="text">
+                                    <string>P4</string>
+                                </property>
+                            </widget>
+                        </item>
+                        <item row="3" column="1">
+                            <widget class="QDoubleSpinBox" name="p4DoubleSpinBox">
+                                <property name="readOnly">
+                                    <bool>true</bool>
+                                </property>
+                                <property name="maximum">
+                                    <double>20000.000000000000000</double>
+                                </property>
+                            </widget>
+                        </item>
+                        <item row="2" column="0">
+                            <widget class="QLabel" name="p3Label">
+                                <property name="text">
+                                    <string>P3</string>
+                                </property>
+                            </widget>
+                        </item>
+                        <item row="2" column="1">
+                            <widget class="QDoubleSpinBox" name="p3DoubleSpinBox">
+                                <property name="readOnly">
+                                    <bool>true</bool>
+                                </property>
+                                <property name="maximum">
+                                    <double>20000.000000000000000</double>
+                                </property>
+                            </widget>
+                        </item>
+                    </layout>
+                </item>
+                <item row="5" column="0">
+                    <widget class="QLabel" name="cantAlmacenLabel">
+                        <property name="text">
+                            <string>Cant Almacen</string>
+                        </property>
+                    </widget>
+                </item>
+                <item row="5" column="1">
+                    <widget class="QDoubleSpinBox" name="cantAlmacenDoubleSpinBox">
+                        <property name="readOnly">
+                            <bool>true</bool>
+                        </property>
+                        <property name="maximum">
+                            <double>80000.000000000000000</double>
+                        </property>
+                    </widget>
+                </item>
+                <item row="6" column="0">
+                    <widget class="QLabel" name="proveedorLabel">
+                        <property name="text">
+                            <string>Proveedor</string>
+                        </property>
+                    </widget>
+                </item>
+                <item row="6" column="1">
+                    <layout class="QHBoxLayout" name="horizontalLayout">
+                        <item>
+                            <widget class="QLineEdit" name="proveedorLineEdit">
+                                <property name="readOnly">
+                                    <bool>true</bool>
+                                </property>
+                            </widget>
+                        </item>
+                    </layout>
+                </item>
+                <item row="7" column="0">
+                    <widget class="QLabel" name="fleteLabel">
+                        <property name="text">
+                            <string>Flete</string>
+                        </property>
+                    </widget>
+                </item>
+                <item row="7" column="1">
+                    <widget class="QDoubleSpinBox" name="fleteDoubleSpinBox">
+                        <property name="readOnly">
+                            <bool>true</bool>
+                        </property>
+                        <property name="decimals">
+                            <number>4</number>
+                        </property>
+                        <property name="maximum">
+                            <double>20000.000000000000000</double>
+                        </property>
+                    </widget>
+                </item>
+                <item row="8" column="0">
+                    <widget class="QLabel" name="ubicacionLabel">
+                        <property name="text">
+                            <string>Ubicacion</string>
+                        </property>
+                    </widget>
+                </item>
+                <item row="8" column="1">
+                    <widget class="QLineEdit" name="ubicacionLineEdit">
+                        <property name="maxLength">
+                            <number>15</number>
+                        </property>
+                        <property name="readOnly">
+                            <bool>true</bool>
+                        </property>
+                        <property name="placeholderText">
+                            <string>Introduzca la ubicación actual</string>
+                        </property>
+                    </widget>
+                </item>
+                <item row="9" column="0">
+                    <widget class="QLabel" name="cantMinimaLabel">
+                        <property name="text">
+                            <string>Cant Minima</string>
+                        </property>
+                    </widget>
+                </item>
+                <item row="9" column="1">
+                    <widget class="QDoubleSpinBox" name="cantMinimaDoubleSpinBox">
+                        <property name="readOnly">
+                            <bool>true</bool>
+                        </property>
+                        <property name="maximum">
+                            <double>500.000000000000000</double>
+                        </property>
+                    </widget>
+                </item>
+                <item row="10" column="0">
+                    <widget class="QLabel" name="impuestoLabel">
+                        <property name="text">
+                            <string>Impuesto</string>
+                        </property>
+                    </widget>
+                </item>
+                <item row="10" column="1">
+                    <widget class="QDoubleSpinBox" name="impuestoDoubleSpinBox">
+                        <property name="readOnly">
+                            <bool>true</bool>
+                        </property>
+                        <property name="maximum">
+                            <double>500.000000000000000</double>
+                        </property>
+                    </widget>
+                </item>
+                <item row="11" column="0">
+                    <widget class="QLabel" name="descripcionLabel">
+                        <property name="text">
+                            <string>Descripcion</string>
+                        </property>
+                    </widget>
+                </item>
+                <item row="11" column="1">
+                    <widget class="QTextEdit" name="descripcionTextEdit">
+                        <property name="maximumSize">
+                            <size>
+                                <width>16777215</width>
+                                <height>200</height>
+                            </size>
+                        </property>
+                        <property name="readOnly">
+                            <bool>true</bool>
+                        </property>
+                        <property name="html">
+                            <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+                                &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style
+                                type=&quot;text/css&quot;&gt;
+                                p, li { white-space: pre-wrap; }
+                                &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2';
+                                font-size:10pt; font-weight:400; font-style:normal;&quot;&gt;
+                                &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px;
+                                margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br
+                                /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
+                            </string>
+                        </property>
+                        <property name="placeholderText">
+                            <string>Escriba la descripción</string>
+                        </property>
+                    </widget>
+                </item>
+            </layout>
+        </widget>
+        <widget class="QWidget" name="gridLayoutWidget">
+            <property name="geometry">
+                <rect>
+                    <x>330</x>
+                    <y>10</y>
+                    <width>611</width>
+                    <height>611</height>
+                </rect>
+            </property>
+            <layout class="QGridLayout" name="gridLayout">
+                <item row="2" column="1" rowspan="5">
+                    <widget class="QTreeWidget" name="makeTreeWidget">
+                        <attribute name="headerStretchLastSection">
+                            <bool>false</bool>
+                        </attribute>
+                        <column>
+                            <property name="text">
+                                <string>Marca</string>
+                            </property>
+                        </column>
+                        <column>
+                            <property name="text">
+                                <string>Modelo</string>
+                            </property>
+                        </column>
+                        <column>
+                            <property name="text">
+                                <string>Año</string>
+                            </property>
+                        </column>
+                        <column>
+                            <property name="text">
+                                <string>Motor</string>
+                            </property>
+                        </column>
+                    </widget>
+                </item>
+                <item row="0" column="0">
+                    <widget class="QLabel" name="imagenLabel">
+                        <property name="minimumSize">
+                            <size>
+                                <width>150</width>
+                                <height>150</height>
+                            </size>
+                        </property>
+                        <property name="maximumSize">
+                            <size>
+                                <width>150</width>
+                                <height>150</height>
+                            </size>
+                        </property>
+                        <property name="text">
+                            <string/>
+                        </property>
+                    </widget>
+                </item>
+                <item row="1" column="0">
+                    <widget class="QLabel" name="imagenBarcodeLabel">
+                        <property name="minimumSize">
+                            <size>
+                                <width>150</width>
+                                <height>150</height>
+                            </size>
+                        </property>
+                        <property name="maximumSize">
+                            <size>
+                                <width>150</width>
+                                <height>150</height>
+                            </size>
+                        </property>
+                        <property name="text">
+                            <string/>
+                        </property>
+                    </widget>
+                </item>
+                <item row="2" column="0">
+                    <spacer name="verticalSpacer">
+                        <property name="orientation">
+                            <enum>Qt::Vertical</enum>
+                        </property>
+                        <property name="sizeHint" stdset="0">
+                            <size>
+                                <width>20</width>
+                                <height>40</height>
+                            </size>
+                        </property>
+                    </spacer>
+                </item>
+                <item row="0" column="1" rowspan="2">
+                    <widget class="QTreeWidget" name="treeWidgetEvents">
+                        <attribute name="headerStretchLastSection">
+                            <bool>false</bool>
+                        </attribute>
+                        <column>
+                            <property name="text">
+                                <string>Fecha</string>
+                            </property>
+                        </column>
+                        <column>
+                            <property name="text">
+                                <string>Operacion</string>
+                            </property>
+                        </column>
+                        <column>
+                            <property name="text">
+                                <string>Cantidad</string>
+                            </property>
+                        </column>
+                    </widget>
+                </item>
+                <item row="4" column="0">
+                    <widget class="QPushButton" name="editarPushButton">
+                        <property name="text">
+                            <string>Editar</string>
+                        </property>
+                    </widget>
+                </item>
+                <item row="5" column="0">
+                    <layout class="QHBoxLayout" name="horizontalLayout_2">
+                        <item>
+                            <widget class="QPushButton" name="okPushButton">
+                                <property name="styleSheet">
+                                    <string notr="true">QPushButton
+                                        {
+                                        background-color: white;
+                                        font: 10pt;
+                                        color: rgb(67, 136, 101);
+                                        padding: 4px 8px;
+                                        border: 2px solid rgb(0, 170, 127);
+                                        border-bottom-right-radius: 0px;
+                                        border-bottom-left-radius: 0px;
+                                        border-top-right-radius: 0px;
+                                        border-top-left-radius: 0px;
+                                        }
+
+                                        :hover
+                                        {
+                                        background-color: rgb(0, 170, 127);
+                                        color: white;
+                                        border: 2px solid rgb(120, 200, 29);
+                                        }
+
+                                        :pressed
+                                        {
+                                        border:3px solid rgb(255, 255, 255);
+                                        padding: -1px 1px 1px 1px;
+                                        }
+                                    </string>
+                                </property>
+                                <property name="text">
+                                    <string>Ok</string>
+                                </property>
+                            </widget>
+                        </item>
+                        <item>
+                            <widget class="QPushButton" name="cancelPushButton">
+                                <property name="styleSheet">
+                                    <string notr="true">QPushButton{
+                                        background-color: white;
+                                        font: 10pt;
+                                        color: rgb(255, 86, 71);
+                                        padding: 4px 8px;
+                                        border: 2px solid rgb(217, 71, 60);
+                                        border-bottom-right-radius: 0px;
+                                        border-bottom-left-radius: 0px;
+                                        border-top-right-radius: 0px;
+                                        border-top-left-radius: 0px;
+                                        }
+
+                                        :hover{
+                                        background-color: rgb(217, 71, 60);
+                                        border: 2px solid rgb(255, 86, 71);
+                                        color: white;
+                                        }
+
+                                        :pressed{
+                                        border:3px solid rgb(255, 255, 255);
+                                        padding: -1px 1px 1px 1px;
+                                        }
+                                    </string>
+                                </property>
+                                <property name="text">
+                                    <string>Cancelar</string>
+                                </property>
+                            </widget>
+                        </item>
+                    </layout>
+                </item>
+                <item row="3" column="0">
+                    <widget class="QPushButton" name="deletePushButton">
+                        <property name="text">
+                            <string>Eliminar</string>
+                        </property>
+                    </widget>
+                </item>
+            </layout>
+        </widget>
+    </widget>
+    <resources/>
+    <connections/>
+</ui>

@@ -770,6 +770,8 @@ try:
                 i += 0
                 logging.warning("Problemas cargando el archivo %s", "FILE00{}".format(i))
                 dialogLicUi = None
+
+            dialogListUi = uic.loadUiType(os.path.join("system", "layout", "dialogList.ui"))[0]
         except:
             logging.error("Problemas cargando archivos %s", 'EXCFILE001')
 
@@ -2641,6 +2643,33 @@ try:
                     self.lineEditBuscar.setText(dialog.nombreLineEdit.text())
         # <> fin DialogClientLayout
 
+        class DialogList(QDialog, dialogListUi):
+            def __init__(self, header, list):
+                super(DialogList, self).__init__()
+                self.setupUi(self)
+
+                self.tablaTreeWidget.setHeaderLabels(header)
+                for i in list:
+                    elem = []
+                    for k in i:
+                        elem.append(str(k))
+                    item = QTreeWidgetItem(elem)
+                    self.tablaTreeWidget.addTopLevelItem(item)
+
+                self.actionPrint = "print"
+                self.cancelPushButton.clicked.connect(self.cancel)
+                self.printPushButton.clicked.connect(self.print)
+
+            def cancel(self):
+                self.reject()
+
+            def print(self):
+                self.action = self.actionPrint
+                self.accept()
+
+
+        # <> fin DialogList
+
 
         class DialogNewClientLayout(QDialog, dialogNewClientUi, SQL):
             def __init__(self, editable=True):
@@ -2650,8 +2679,14 @@ try:
 
                 self.setWindowIcon(QIcon(os.path.join("system", "image", "icono.png")))
 
-                self.okPushButton.hide()
                 self.editable = editable
+
+                self.okPushButton.hide()
+
+                if not self.editable:
+                    self.facturaPushButton.show()
+                else:
+                    self.facturaPushButton.hide()
 
                 self.connect()
 
@@ -2659,6 +2694,7 @@ try:
                 self.nombreLineEdit.textChanged.connect(self.nombre)
                 self.okPushButton.clicked.connect(self.ok)
                 self.cancelPushButton.clicked.connect(self.cancel)
+                self.facturaPushButton.clicked.connect(self.showFacturas)
 
             def nombre(self, txt):
                 if txt.__len__() > 5 and self.editable:
@@ -2676,6 +2712,17 @@ try:
 
             def cancel(self):
                 self.reject()
+
+            def showFacturas(self):
+                dialog = DialogCalendarLayout()
+                if dialog.exec_():
+                    fechas = dialog.getDay()
+                    lista = self.queryFree(SELECT="El.time, I.invoice, ",
+                                           FROM="",
+                                           QUERY="")
+                    dialogList = DialogList(["Col 1", "Col 2"], [[3, 4], [5, 6]])
+                    if dialogList.exec_():
+                        pass
         # <> fin DialogNewClientLayout
 
 

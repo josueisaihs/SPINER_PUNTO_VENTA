@@ -1,0 +1,351 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+    <class>Dialog</class>
+    <widget class="QDialog" name="Dialog" key="8c6d022ba8d208ff4df0661fe5fe92f2">
+        <property name="windowModality">
+            <enum>Qt::WindowModal</enum>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>0</x>
+                <y>0</y>
+                <width>500</width>
+                <height>400</height>
+            </rect>
+        </property>
+        <property name="windowTitle">
+            <string>Login</string>
+        </property>
+        <property name="styleSheet">
+            <string notr="true">QMainWindow, QDialog{
+                background-color: rgb(255, 255, 255);
+                }
+
+                /**** QPushButton (enabled) ****/
+                QPushButton
+                {
+                background-color: rgb(255, 255, 255);
+                font: 9pt;
+                color: rgb(85, 170, 255);
+                padding: 4px 8px;
+                border: 2px solid rgb(255, 255, 255);
+                border-radius: 0px;
+                padding: 5px;
+                border-top: 1px white;
+                border-left: 1px white;
+                border-right: 1px white;
+                }
+
+                QPushButton:hover
+                {
+                border: 2px solid rgb(85, 170, 255);
+                font: 10pt;
+                border-top: 1px white;
+                border-left: 1px white;
+                border-right: 1px white;
+                }
+
+                QPushButton:pressed
+                {
+                font: 11pt;
+                border:3px solid rgb(85, 170, 255);
+                padding: 5px 5px 5px 5px;
+                border-top: 1px white;
+                border-left: 1px white;
+                border-right: 1px white;
+                }
+
+                /******* QLabel ***********/
+                QLabel{
+                color: rgb(120, 120, 120)
+                }
+                labelHab1:hover{
+                color: rgb(120, 0, 0)
+                }
+
+                /*******QLineEdit************/
+                QTextEdit {
+                font: 10pt;
+                color: rgb(120, 120, 120);
+                border: 1px solid rgb(156, 156, 156);
+                border-radius: 0px;
+                padding: 2px;
+                }
+                QLineEdit, QDateEdit, QDoubleSpinBox, QSpinBox{
+                font: 10pt;
+                color: rgb(120, 120, 120);
+                border: 1px solid rgb(156, 156, 156);
+                border-radius: 0px;
+                padding: 2px;
+                border-top: 1px white;
+                border-left: 1px white;
+                border-right: 1px white;
+                }
+                /********QComboBox*******/
+                QComboBox{
+                font: 10pt;
+                color: rgb(120, 120, 120);
+                border: 1px solid rgb(156, 156, 156);
+                padding: 2px;
+                selection-background-color: white;
+                selection-color: rgb(120, 120, 120);
+                border-top: 1px white;
+                border-left: 1px white;
+                border-right: 1px white;
+                }
+                QComboBox QAbstractItemView
+                {
+                background-color: white;
+                color:rgb(120, 120, 120);
+                padding: 4px;
+                border: 1px solid rgb(156, 156, 156);
+                border-top: 1px white;
+                border-left: 1px white;
+                border-right: 1px white;
+                }
+
+                QLineEdit:hover, QDateEdit:hover, QDoubleSpinBox:hover, QComboBox:hover
+                {
+                color: rgb(85, 170, 255);
+                border: 1px solid rgb(85, 170, 255);
+                border-top: 1px white;
+                border-left: 1px white;
+                border-right: 1px white;
+                }
+
+                QLineEdit:focus, QDateEdit:focus, QDoubleSpinBox:focus, QComboBox:focus
+                {
+                border-color: rgb(90,200,255);
+                border-top: 1px white;
+                border-left: 1px white;
+                border-right: 1px white;
+                }
+
+                QToolTip
+                {
+                background-color:rgb(85, 170, 255);
+                color: white;
+                border: 1px solid rgb(85, 170, 255);
+                opacity: 50;
+                padding: 1px;
+                }
+                QTabWidget
+                {
+                background-color: transparent;
+                }
+
+                QTabWidget::pane {
+                border-top: 1px solid rgb(156, 156, 156);
+                border-bottom: 1px solid rgb(156, 156, 156);
+                position: absolute;
+                top: -0.25em;
+                }
+                /**** QTabWidget (disabled) ****/
+                QTabWidget::pane:disabled
+                {
+                border-color: rgb(60,60,60);
+                }
+
+                QTabWidget::tab-bar {
+                alignment: center;
+                border: 1px white;
+                border-radius: 5px;
+                }
+
+                QTreeView
+                {
+                alternate-background-color: rgb(200,200,200);
+                background-color: white;
+                border: 1px solid rgb(156, 156, 156);
+                font: 10pt;
+                color: rgb(120,120,120);
+                selection-background-color:rgb(90,200,255);
+                selection-color: rgb(156, 156, 156);
+                }
+                QListView{
+                alternate-background-color: rgb(200,200,200);
+                background-color: white;
+                border: 1px solid rgb(255, 255, 255);
+                font: 8pt;
+                color: rgb(120,120,120);
+                selection-background-color:rgb(90,200,255);
+                selection-color: rgb(156, 156, 156);
+                }
+            </string>
+        </property>
+        <widget class="QLabel" name="labelImagen">
+            <property name="geometry">
+                <rect>
+                    <x>20</x>
+                    <y>10</y>
+                    <width>481</width>
+                    <height>341</height>
+                </rect>
+            </property>
+            <property name="text">
+                <string/>
+            </property>
+            <property name="alignment">
+                <set>Qt::AlignBottom|Qt::AlignRight|Qt::AlignTrailing</set>
+            </property>
+        </widget>
+        <widget class="QFrame" name="frameLogin">
+            <property name="geometry">
+                <rect>
+                    <x>140</x>
+                    <y>180</y>
+                    <width>231</width>
+                    <height>171</height>
+                </rect>
+            </property>
+            <property name="frameShape">
+                <enum>QFrame::StyledPanel</enum>
+            </property>
+            <property name="frameShadow">
+                <enum>QFrame::Raised</enum>
+            </property>
+            <widget class="QLineEdit" name="lineEditUser">
+                <property name="geometry">
+                    <rect>
+                        <x>10</x>
+                        <y>10</y>
+                        <width>209</width>
+                        <height>23</height>
+                    </rect>
+                </property>
+                <property name="toolTip">
+                    <string/>
+                </property>
+                <property name="toolTipDuration">
+                    <number>-1</number>
+                </property>
+                <property name="styleSheet">
+                    <string notr="true">border-top: 1px white;
+                        border-left: 1px white;
+                        border-right: 1px white;
+                    </string>
+                </property>
+                <property name="text">
+                    <string/>
+                </property>
+                <property name="maxLength">
+                    <number>20</number>
+                </property>
+            </widget>
+            <widget class="QLabel" name="label">
+                <property name="geometry">
+                    <rect>
+                        <x>10</x>
+                        <y>40</y>
+                        <width>209</width>
+                        <height>13</height>
+                    </rect>
+                </property>
+                <property name="styleSheet">
+                    <string notr="true"/>
+                </property>
+                <property name="text">
+                    <string>User</string>
+                </property>
+                <property name="alignment">
+                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                </property>
+            </widget>
+            <widget class="QLineEdit" name="lineEditPwd">
+                <property name="geometry">
+                    <rect>
+                        <x>10</x>
+                        <y>60</y>
+                        <width>209</width>
+                        <height>23</height>
+                    </rect>
+                </property>
+                <property name="toolTip">
+                    <string/>
+                </property>
+                <property name="styleSheet">
+                    <string notr="true">
+                        border-top: 1px white;
+                        border-left: 1px white;
+                        border-right: 1px white;
+                    </string>
+                </property>
+                <property name="maxLength">
+                    <number>20</number>
+                </property>
+                <property name="echoMode">
+                    <enum>QLineEdit::Password</enum>
+                </property>
+            </widget>
+            <widget class="QLabel" name="label_2">
+                <property name="geometry">
+                    <rect>
+                        <x>10</x>
+                        <y>90</y>
+                        <width>209</width>
+                        <height>13</height>
+                    </rect>
+                </property>
+                <property name="styleSheet">
+                    <string notr="true"/>
+                </property>
+                <property name="text">
+                    <string>Password</string>
+                </property>
+                <property name="alignment">
+                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                </property>
+            </widget>
+            <widget class="QPushButton" name="pushButtonLogin">
+                <property name="geometry">
+                    <rect>
+                        <x>180</x>
+                        <y>130</y>
+                        <width>44</width>
+                        <height>30</height>
+                    </rect>
+                </property>
+                <property name="styleSheet">
+                    <string notr="true"/>
+                </property>
+                <property name="text">
+                    <string>Login</string>
+                </property>
+            </widget>
+            <widget class="QPushButton" name="pushButtonAccountCreate">
+                <property name="geometry">
+                    <rect>
+                        <x>110</x>
+                        <y>130</y>
+                        <width>59</width>
+                        <height>30</height>
+                    </rect>
+                </property>
+                <property name="toolTip">
+                    <string/>
+                </property>
+                <property name="text">
+                    <string>Account</string>
+                </property>
+            </widget>
+        </widget>
+        <widget class="QLabel" name="labelLogin">
+            <property name="geometry">
+                <rect>
+                    <x>10</x>
+                    <y>10</y>
+                    <width>491</width>
+                    <height>161</height>
+                </rect>
+            </property>
+            <property name="text">
+                <string/>
+            </property>
+            <property name="alignment">
+                <set>Qt::AlignBottom|Qt::AlignRight|Qt::AlignTrailing</set>
+            </property>
+        </widget>
+    </widget>
+    <resources/>
+    <connections/>
+</ui>

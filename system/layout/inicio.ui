@@ -1,0 +1,449 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+    <class>Dialog</class>
+    <widget class="QDialog" name="Dialog" key="0adcff59830fbf97e68f8be4c2a94c9b">
+        <property name="geometry">
+            <rect>
+                <x>0</x>
+                <y>0</y>
+                <width>820</width>
+                <height>690</height>
+            </rect>
+        </property>
+        <property name="maximumSize">
+            <size>
+                <width>820</width>
+                <height>690</height>
+            </size>
+        </property>
+        <property name="windowTitle">
+            <string>Inicio</string>
+        </property>
+        <property name="styleSheet">
+            <string notr="true">QMainWindow, QDialog{
+                background-color: rgb(255, 255, 255);
+                }
+
+                /**** QPushButton (enabled) ****/
+                QPushButton
+                {
+                background-color: rgb(85, 170, 255);
+                font: 10pt;
+                color: rgb(255, 255, 255);
+                padding: 4px 8px;
+                border: 2px solid rgb(85, 170, 255);
+                border-radius: 8px;
+                padding: 5px;
+                }
+
+                QPushButton:hover
+                {
+                background-color: rgb(0, 121, 182);
+                border: 2px solid rgb(66, 133, 199);
+                }
+
+                QPushButton:pressed
+                {
+                border:3px solid rgb(66, 133, 199);
+                padding: -1px 1px 1px 1px;
+                }
+
+                /******* QLabel ***********/
+                QLabel{
+                color: rgb(120, 120, 120)
+                }
+                labelHab1:hover{
+                color: rgb(120, 0, 0)
+                }
+
+                /*******QLineEdit************/
+                QTextEdit {
+                font: 10pt;
+                color: rgb(120, 120, 120);
+                border: 1px solid rgb(156, 156, 156);
+                border-radius: 0px;
+                padding: 2px;
+                }
+                QLineEdit, QDateEdit, QDoubleSpinBox, QSpinBox{
+                font: 10pt;
+                color: rgb(120, 120, 120);
+                border: 1px solid rgb(156, 156, 156);
+                border-radius: 0px;
+                padding: 2px;
+                border-top: 1px white;
+                border-left: 1px white;
+                border-right: 1px white;
+                }
+                /********QComboBox*******/
+                QComboBox{
+                font: 10pt;
+                color: rgb(120, 120, 120);
+                border: 1px solid rgb(156, 156, 156);
+                padding: 2px;
+                selection-background-color: white;
+                selection-color: rgb(120, 120, 120);
+                border-top: 1px white;
+                border-left: 1px white;
+                border-right: 1px white;
+                }
+                QComboBox QAbstractItemView
+                {
+                background-color: white;
+                color:rgb(120, 120, 120);
+                padding: 4px;
+                border: 1px solid rgb(156, 156, 156);
+                border-top: 1px white;
+                border-left: 1px white;
+                border-right: 1px white;
+                }
+
+                QLineEdit:hover, QDateEdit:hover, QDoubleSpinBox:hover, QComboBox:hover
+                {
+                color: rgb(85, 170, 255);
+                border: 1px solid rgb(85, 170, 255);
+                border-top: 1px white;
+                border-left: 1px white;
+                border-right: 1px white;
+                }
+
+                QLineEdit:focus, QDateEdit:focus, QDoubleSpinBox:focus, QComboBox:focus
+                {
+                border-color: rgb(90,200,255);
+                border-top: 1px white;
+                border-left: 1px white;
+                border-right: 1px white;
+                }
+
+                QToolTip
+                {
+                background-color:rgb(85, 170, 255);
+                color: white;
+                border: 1px solid rgb(85, 170, 255);
+                opacity: 50;
+                padding: 1px;
+                }
+                QTabWidget
+                {
+                background-color: transparent;
+                }
+
+                QTabWidget::pane {
+                border-top: 1px solid rgb(156, 156, 156);
+                border-bottom: 1px solid rgb(156, 156, 156);
+                position: absolute;
+                top: -0.25em;
+                }
+                /**** QTabWidget (disabled) ****/
+                QTabWidget::pane:disabled
+                {
+                border-color: rgb(60,60,60);
+                }
+
+                QTabWidget::tab-bar {
+                alignment: center;
+                border: 1px white;
+                border-radius: 5px;
+                }
+
+                QTreeView
+                {
+                alternate-background-color: rgb(200,200,200);
+                background-color: white;
+                border: 1px solid rgb(156, 156, 156);
+                font: 10pt;
+                color: rgb(120,120,120);
+                selection-background-color:rgb(90,200,255);
+                selection-color: rgb(156, 156, 156);
+                }
+                QListView{
+                alternate-background-color: rgb(200,200,200);
+                background-color: white;
+                border: 1px solid rgb(255, 255, 255);
+                font: 8pt;
+                color: rgb(120,120,120);
+                selection-background-color:rgb(90,200,255);
+                selection-color: rgb(156, 156, 156);
+                }
+            </string>
+        </property>
+        <widget class="QWidget" name="verticalLayoutWidget">
+            <property name="geometry">
+                <rect>
+                    <x>10</x>
+                    <y>400</y>
+                    <width>801</width>
+                    <height>281</height>
+                </rect>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout">
+                <item>
+                    <layout class="QHBoxLayout" name="horizontalLayout">
+                        <item>
+                            <spacer name="horizontalSpacer_2">
+                                <property name="orientation">
+                                    <enum>Qt::Horizontal</enum>
+                                </property>
+                                <property name="sizeHint" stdset="0">
+                                    <size>
+                                        <width>40</width>
+                                        <height>20</height>
+                                    </size>
+                                </property>
+                            </spacer>
+                        </item>
+                        <item>
+                            <widget class="QLineEdit" name="lineEditFastSearcher">
+                                <property name="maximumSize">
+                                    <size>
+                                        <width>225</width>
+                                        <height>16777215</height>
+                                    </size>
+                                </property>
+                                <property name="maxLength">
+                                    <number>20</number>
+                                </property>
+                                <property name="placeholderText">
+                                    <string>Escriba para una búsqueda rápida</string>
+                                </property>
+                            </widget>
+                        </item>
+                        <item>
+                            <spacer name="horizontalSpacer">
+                                <property name="orientation">
+                                    <enum>Qt::Horizontal</enum>
+                                </property>
+                                <property name="sizeHint" stdset="0">
+                                    <size>
+                                        <width>40</width>
+                                        <height>20</height>
+                                    </size>
+                                </property>
+                            </spacer>
+                        </item>
+                    </layout>
+                </item>
+                <item>
+                    <layout class="QHBoxLayout" name="horizontalLayout_2">
+                        <item>
+                            <widget class="QListWidget" name="listWidgetPicker">
+                                <property name="movement">
+                                    <enum>QListView::Free</enum>
+                                </property>
+                                <property name="isWrapping" stdset="0">
+                                    <bool>true</bool>
+                                </property>
+                                <property name="viewMode">
+                                    <enum>QListView::ListMode</enum>
+                                </property>
+                                <property name="currentRow">
+                                    <number>-1</number>
+                                </property>
+                            </widget>
+                        </item>
+                    </layout>
+                </item>
+            </layout>
+        </widget>
+        <widget class="QWidget" name="gridLayoutWidget">
+            <property name="geometry">
+                <rect>
+                    <x>10</x>
+                    <y>10</y>
+                    <width>801</width>
+                    <height>381</height>
+                </rect>
+            </property>
+            <layout class="QGridLayout" name="gridLayout">
+                <item row="0" column="3">
+                    <widget class="QLabel" name="label_2">
+                        <property name="styleSheet">
+                            <string notr="true">font: bold 12pt;
+                                color: rgb(255, 85, 0);
+                                padding-bottom: 5px;
+                                border: 1px solid rgb(255, 85, 0);
+                                border-radius: 0px;
+                                border-top: 1px white;
+                                border-left: 1px white;
+                                border-right: 1px white;
+                            </string>
+                        </property>
+                        <property name="text">
+                            <string>Notificaciones</string>
+                        </property>
+                        <property name="alignment">
+                            <set>Qt::AlignCenter</set>
+                        </property>
+                    </widget>
+                </item>
+                <item row="1" column="0">
+                    <widget class="QListWidget" name="listWidgetPickerAction">
+                        <property name="minimumSize">
+                            <size>
+                                <width>0</width>
+                                <height>200</height>
+                            </size>
+                        </property>
+                        <property name="maximumSize">
+                            <size>
+                                <width>16777215</width>
+                                <height>400</height>
+                            </size>
+                        </property>
+                        <property name="styleSheet">
+                            <string notr="true">border: 5px solid rgb(72, 144, 216);
+                                border-radius: 0px;
+                                border-top: 1px white;
+                                border-left: 1px white;
+                                border-right: 1px white;
+                            </string>
+                        </property>
+                        <property name="isWrapping" stdset="0">
+                            <bool>true</bool>
+                        </property>
+                        <property name="layoutMode">
+                            <enum>QListView::SinglePass</enum>
+                        </property>
+                        <property name="spacing">
+                            <number>0</number>
+                        </property>
+                        <property name="viewMode">
+                            <enum>QListView::ListMode</enum>
+                        </property>
+                    </widget>
+                </item>
+                <item row="0" column="0">
+                    <widget class="QLabel" name="label">
+                        <property name="styleSheet">
+                            <string notr="true">font: bold 12pt;
+                                color: rgb(72, 144, 216);
+                                padding-bottom: 5px;
+                                border: 1px solid rgb(72, 144, 216);
+                                border-radius: 0px;
+                                border-top: 1px white;
+                                border-left: 1px white;
+                                border-right: 1px white;
+                            </string>
+                        </property>
+                        <property name="text">
+                            <string>Opciones</string>
+                        </property>
+                        <property name="alignment">
+                            <set>Qt::AlignCenter</set>
+                        </property>
+                    </widget>
+                </item>
+                <item row="1" column="3">
+                    <layout class="QVBoxLayout" name="verticalLayout_3">
+                        <item>
+                            <widget class="QListWidget" name="listWidgetPickerNotification">
+                                <property name="minimumSize">
+                                    <size>
+                                        <width>0</width>
+                                        <height>150</height>
+                                    </size>
+                                </property>
+                                <property name="maximumSize">
+                                    <size>
+                                        <width>16777215</width>
+                                        <height>400</height>
+                                    </size>
+                                </property>
+                                <property name="styleSheet">
+                                    <string notr="true">border: 5px solid rgb(255, 85, 0);
+                                        border-radius: 0px;
+                                        border-top: 1px white;
+                                        border-left: 1px white;
+                                        border-right: 1px white;
+                                    </string>
+                                </property>
+                                <property name="selectionMode">
+                                    <enum>QAbstractItemView::SingleSelection</enum>
+                                </property>
+                                <property name="movement">
+                                    <enum>QListView::Static</enum>
+                                </property>
+                                <property name="isWrapping" stdset="0">
+                                    <bool>true</bool>
+                                </property>
+                                <property name="spacing">
+                                    <number>0</number>
+                                </property>
+                                <property name="viewMode">
+                                    <enum>QListView::ListMode</enum>
+                                </property>
+                                <property name="uniformItemSizes">
+                                    <bool>false</bool>
+                                </property>
+                            </widget>
+                        </item>
+                    </layout>
+                </item>
+                <item row="0" column="1">
+                    <widget class="QLabel" name="label_3">
+                        <property name="styleSheet">
+                            <string notr="true">font: bold 12pt;
+                                color: rgb(200, 15, 20);
+                                padding-bottom: 5px;
+                                border: 1px solid rgb(200, 15, 20);
+                                border-radius: 0px;
+                                border-top: 1px white;
+                                border-left: 1px white;
+                                border-right: 1px white;
+                            </string>
+                        </property>
+                        <property name="text">
+                            <string>Deudas</string>
+                        </property>
+                        <property name="alignment">
+                            <set>Qt::AlignCenter</set>
+                        </property>
+                    </widget>
+                </item>
+                <item row="1" column="1">
+                    <widget class="QListWidget" name="listWidgetPickerDeuda">
+                        <property name="minimumSize">
+                            <size>
+                                <width>0</width>
+                                <height>150</height>
+                            </size>
+                        </property>
+                        <property name="maximumSize">
+                            <size>
+                                <width>16777215</width>
+                                <height>400</height>
+                            </size>
+                        </property>
+                        <property name="styleSheet">
+                            <string notr="true">border: 5px solid rgb(200, 15, 20);
+                                border-radius: 0px;
+                                border-top: 1px white;
+                                border-left: 1px white;
+                                border-right: 1px white;
+                            </string>
+                        </property>
+                        <property name="selectionMode">
+                            <enum>QAbstractItemView::SingleSelection</enum>
+                        </property>
+                        <property name="movement">
+                            <enum>QListView::Static</enum>
+                        </property>
+                        <property name="isWrapping" stdset="0">
+                            <bool>true</bool>
+                        </property>
+                        <property name="spacing">
+                            <number>0</number>
+                        </property>
+                        <property name="viewMode">
+                            <enum>QListView::ListMode</enum>
+                        </property>
+                        <property name="uniformItemSizes">
+                            <bool>false</bool>
+                        </property>
+                    </widget>
+                </item>
+            </layout>
+        </widget>
+    </widget>
+    <resources/>
+    <connections/>
+</ui>

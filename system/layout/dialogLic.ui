@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+    <class>Dialog</class>
+    <widget class="QDialog" name="Dialog" key="d25c6de6b8e3f0ef0c287666ab611533">
+        <property name="windowModality">
+            <enum>Qt::WindowModal</enum>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>0</x>
+                <y>0</y>
+                <width>292</width>
+                <height>181</height>
+            </rect>
+        </property>
+        <property name="windowTitle">
+            <string>Licencia</string>
+        </property>
+        <property name="styleSheet">
+            <string notr="true">QMainWindow, QDialog{
+                background-color: rgb(255, 255, 255);
+                }
+
+                QPushButton
+                {
+                background-color: rgb(255, 255, 255);
+                font: 10pt;
+                color: rgb(85, 170, 255);
+                padding: 4px 8px;
+                border: 2px solid rgb(255, 255, 255);
+                border-radius: 0px;
+                padding: 5px;
+                border-top: 1px white;
+                border-left: 1px white;
+                border-right: 1px white;
+                }
+
+                QPushButton:hover
+                {
+                border: 2px solid rgb(85, 170, 255);
+                font: 11pt;
+                border-top: 1px white;
+                border-left: 1px white;
+                border-right: 1px white;
+                }
+
+                QPushButton:pressed
+                {
+                font: 12pt;
+                border:3px solid rgb(85, 170, 255);
+                padding: -1px 1px 1px 1px;
+                border-top: 1px white;
+                border-left: 1px white;
+                border-right: 1px white;
+                }
+
+                /******* QLabel ***********/
+                QLabel{
+                color: rgb(120, 120, 120)
+                }
+                labelHab1:hover{
+                color: rgb(120, 0, 0)
+                }
+
+                /*******QLineEdit************/
+                QLineEdit, QDateEdit, QDoubleSpinBox, QSpinBox{
+                font: 10pt;
+                color: rgb(120, 120, 120);
+                border: 1px solid rgb(156, 156, 156);
+                border-radius: 0px;
+                padding: 2px;
+                }
+                /********QComboBox*******/
+                QComboBox{
+                font: 10pt;
+                color: rgb(120, 120, 120);
+                border: 1px solid rgb(156, 156, 156);
+                padding: 2px;
+                selection-background-color: white;
+                selection-color: rgb(120, 120, 120);
+                }
+                QComboBox QAbstractItemView
+                {
+                background-color: white;
+                color:rgb(120, 120, 120);
+                padding: 4px;
+                border: 1px solid rgb(156, 156, 156);
+                }
+
+                QLineEdit:hover, QDateEdit:hover, QDoubleSpinBox:hover, QComboBox:hover
+                {
+                color: rgb(85, 170, 255);
+                border: 1px solid rgb(85, 170, 255);
+                }
+
+                QLineEdit:focus, QDateEdit:focus, QDoubleSpinBox:focus, QComboBox:focus
+                {
+                border-color: rgb(90,200,255);
+                }
+
+                QToolTip
+                {
+                background-color:rgb(85, 170, 255);
+                color: white;
+                border: 1px solid rgb(85, 170, 255);
+                opacity: 50;
+                padding: 1px;
+                }
+                QTabWidget
+                {
+                background-color: transparent;
+                }
+
+                QTabWidget::pane {
+                border-top: 1px solid rgb(156, 156, 156);
+                border-bottom: 1px solid rgb(156, 156, 156);
+                position: absolute;
+                top: -0.25em;
+                }
+                /**** QTabWidget (disabled) ****/
+                QTabWidget::pane:disabled
+                {
+                border-color: rgb(60,60,60);
+                }
+
+                QTabWidget::tab-bar {
+                alignment: center;
+                border: 1px white;
+                border-radius: 5px;
+                }
+
+                QTreeView
+                {
+                alternate-background-color: rgb(200,200,200);
+                background-color: white;
+                border: 1px solid rgb(156, 156, 156);
+                font: 10pt;
+                color: rgb(120,120,120);
+                selection-background-color:rgb(90,200,255);
+                selection-color: rgb(156, 156, 156);
+                }
+                QListView{
+                alternate-background-color: rgb(200,200,200);
+                background-color: white;
+                border: 1px solid rgb(255, 255, 255);
+                font: 8pt;
+                color: rgb(120,120,120);
+                selection-background-color:rgb(90,200,255);
+                selection-color: rgb(156, 156, 156);
+                }
+            </string>
+        </property>
+        <property name="modal">
+            <bool>true</bool>
+        </property>
+        <widget class="QWidget" name="verticalLayoutWidget">
+            <property name="geometry">
+                <rect>
+                    <x>10</x>
+                    <y>10</y>
+                    <width>271</width>
+                    <height>161</height>
+                </rect>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout">
+                <item>
+                    <widget class="QPushButton" name="pushButtonRequestLic">
+                        <property name="styleSheet">
+                            <string notr="true"/>
+                        </property>
+                        <property name="text">
+                            <string>Generar</string>
+                        </property>
+                    </widget>
+                </item>
+                <item>
+                    <widget class="QLineEdit" name="lineEdit">
+                        <property name="styleSheet">
+                            <string notr="true">border-top: 1px white;
+                                border-left: 1px white;
+                                border-right: 1px white;
+                            </string>
+                        </property>
+                        <property name="inputMask">
+                            <string>HHHH-HHHH-HHHH-HHHH-HHHH-HHHH-HHHH-HHHH</string>
+                        </property>
+                    </widget>
+                </item>
+                <item>
+                    <widget class="QLabel" name="label_3">
+                        <property name="text">
+                            <string>Insertar Licencia</string>
+                        </property>
+                        <property name="alignment">
+                            <set>Qt::AlignCenter</set>
+                        </property>
+                    </widget>
+                </item>
+                <item>
+                    <widget class="QLineEdit" name="lineEdit_2">
+                        <property name="styleSheet">
+                            <string notr="true">border-top: 1px white;
+                                border-left: 1px white;
+                                border-right: 1px white;
+                            </string>
+                        </property>
+                        <property name="inputMask">
+                            <string>HHHH-HHHH-HHHH-HHHH-HHHH-HHHH-HHHH-HHHH</string>
+                        </property>
+                    </widget>
+                </item>
+                <item>
+                    <widget class="QPushButton" name="pushButtonValLic">
+                        <property name="styleSheet">
+                            <string notr="true"/>
+                        </property>
+                        <property name="text">
+                            <string>Validar</string>
+                        </property>
+                    </widget>
+                </item>
+            </layout>
+        </widget>
+    </widget>
+    <resources/>
+    <connections/>
+</ui>

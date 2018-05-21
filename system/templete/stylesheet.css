@@ -1,0 +1,130 @@
+* {
+    padding: 0px;
+    margin: 0px;
+}
+
+body {
+    text-align: left;
+}
+
+#dir {
+    float: left;
+    padding-left: 5px;
+    margin-right: auto;
+}
+
+#entorno {
+    float: left;
+    padding-left: 5px;
+    margin-right: auto;
+}
+
+#tabla {
+    margin-top: 20px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    float: left;
+}
+
+#fin {
+    clear: left;
+    background-color: white;
+    text-align: center;
+}
+
+th.total {
+    font-size: 12pt;
+}
+
+td.total {
+    font-size: 12pt;
+}
+
+p {
+    font-size: 8pt;
+}
+
+table {
+    font-size: 8pt;
+    font-family: Consolas;
+    font-weight: normal;
+    text-align: left;
+    border-collapse: collapse;
+    margin-left: 20px;
+    margin-right: 20px;
+}
+
+tr {
+    color: black;
+    border-bottom: 1px solid #999999;
+}
+
+tr.inicio {
+    background-color: white;
+    color: black;
+    font-weight: bold;
+    border-bottom: 1px solid;
+}
+
+tr.par {
+    background-color: white;
+    color: black;
+}
+
+th {
+    padding: 5px;
+}
+
+td {
+    padding: 5px;
+}
+
+td.imagenes {
+    padding: 0 20px 0 20px;
+    text-align: start;
+}
+
+#menu {
+    background: white;
+    padding: 5px 5px;
+    align-content: center;
+}
+
+#menu li {
+    display: inline-table;
+    list-style: none;
+    padding: 20px;
+    font: bold 14px verdana, sans-serif;
+}
+
+#seccion {
+    float: left;
+    width: 660px;
+    margin: 20px;
+}
+
+#footer_seccion {
+    text-align: right;
+}
+
+article {
+    background: white;
+    padding: 20px;
+    margin-bottom: 15px;
+}
+
+article footer {
+    text-align: right;
+}
+
+time {
+    color: #999999;
+}
+
+figcaption {
+    font: italic 8px verdana, sans-serif;
+}
+
+footer {
+    text-align: center;
+}
