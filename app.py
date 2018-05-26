@@ -1967,6 +1967,7 @@ try:
 
             def editarCancel(self):
                 # self.deletePushButton.show()
+                self.loadWidgets()
                 self.editarPushButton.show()
                 self.okPushButton.hide()
                 self.cancelPushButton.hide()
@@ -2273,6 +2274,7 @@ try:
                 if dialog.exec_():
                     self.producto = dialog.producto
 
+                    self.cantidadDoubleSpinBox.setValue(0.0)
                     self.categoriaLineEdit.setText(self.producto.get_category())
                     self.codigoLineEdit.setText(self.producto.get_codFab())
                     self.modeloLineEdit.setText(self.producto.get_codCom())
@@ -2596,7 +2598,7 @@ try:
 
                 self.loadTabla()
 
-                self.isInicio = True
+                self.isInicio = inicio
 
                 self.connection()
 
@@ -2628,7 +2630,7 @@ try:
                 if not self.isInicio:
                     self.accept()
                 else:
-                    dialog = DialogNewClientLayout(False)
+                    dialog = DialogNewClientLayout(not self.isInicio)
                     dialog.user = self.user
                     dialog.nombreLineEdit.setText(client[0][0])
                     dialog.telefonoLineEdit.setText(client[0][1])
@@ -2645,10 +2647,11 @@ try:
                         pass
 
             def newClient(self):
-                dialog = DialogNewClientLayout()
+                dialog = DialogNewClientLayout(True)
                 if dialog.exec_():
                     self.lineEditBuscar.setText(dialog.nombreLineEdit.text())
         # <> fin DialogClientLayout
+
 
         class DialogList(QDialog, dialogListUi):
             def __init__(self, header, list):
@@ -2747,241 +2750,246 @@ try:
                                                  fecha1.isoformat(),
                                                  self.nombreLineEdit.text()))
 
-                    header = ["Fecha", "Factura", "Descuento", "Deuda", "Total"]
-                    dialogList = DialogList(header, lista)
-                    dialogList.setWindowTitle("Relacion de Facturas para {}".format(self.nombreLineEdit.text()))
-                    try:
-                        dialogList.textLabel.setText(
-                            "Total: {}\t Descuento: {}\t Deuda: {}".format(meta[0][2], meta[0][0], meta[0][1]))
-                    except:
-                        dialogList.textLabel.setText(
-                            "Total: {}\t Descuento: {}\t Deuda: {}".format(0.0, 0.0, 0.0))
-                    if dialogList.exec_():
-                        if dialogList.action == dialogList.actionPrint:
-                            # Meta de la tabla: Cliente, Telef, Condicion, Descuento Total, Deuda Total, MO, MIS, Total
-                            # Meta de la tabla detalle: Fecha, Factura, Descuento, Deuda, Subtotal
-                            tablaDetalle = ""
-                            for fecha, factura, descuento, deuda, subtotal in lista:
-                                tablaDetalle += "<tr><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td></tr>". \
-                                    format(fecha, factura, descuento, deuda, subtotal)
+                    if lista != []:
+                        header = ["Fecha", "Factura", "Descuento", "Deuda", "Total"]
+                        dialogList = DialogList(header, lista)
+                        dialogList.setWindowTitle("Relacion de Facturas para {}".format(self.nombreLineEdit.text()))
+                        try:
+                            dialogList.textLabel.setText(
+                                "Total: {}\t Descuento: {}\t Deuda: {}".format(meta[0][2], meta[0][0], meta[0][1]))
+                        except:
+                            dialogList.textLabel.setText(
+                                "Total: {}\t Descuento: {}\t Deuda: {}".format(0.0, 0.0, 0.0))
+                        if dialogList.exec_():
+                            if dialogList.action == dialogList.actionPrint:
+                                # Meta de la tabla: Cliente, Telef, Condicion, Descuento Total, Deuda Total, MO, MIS, Total
+                                # Meta de la tabla detalle: Fecha, Factura, Descuento, Deuda, Subtotal
+                                tablaDetalle = ""
+                                for fecha, factura, descuento, deuda, subtotal in lista:
+                                    tablaDetalle += "<tr><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td></tr>". \
+                                        format(fecha, factura, descuento, deuda, subtotal)
 
-                            deuda = meta[0][1]
-                            descuento = meta[0][0]
-                            total = meta[0][2]
+                                deuda = meta[0][1]
+                                descuento = meta[0][0]
+                                total = meta[0][2]
 
-                            html = """
-                                            <!DOCTYPE html>
-<html class="html" lang="es-ES">
-<head>
-    <meta http-equiv="Content-type" content="text/html;charset=UTF-8"/>
-    <meta name="keywords" content="hostal, turismo, cuba, habana, havana"/>
-    <meta name="generator" content="2015.0.0.309"/>
-    <title>Lodging Invoice/ Factura de Alojamiento</title>
-    <!-- CSS -->
-    <link rel="stylesheet" type="text/css" href="css/site_global.css?4052507572"/>
-    <link rel="stylesheet" type="text/css" href="css/index.css?4191106610" id="pagesheet"/>
-    <link rel="stylesheet" href="stylesheet.css">
-    <script src="config.js"></script>
-</head>
-<body>
-<div class="clearfix" id="page"><!-- column -->
-    <div class="clearfix colelem" id="pppu113"><!-- group -->
-        <div class="clearfix grpelem" id="ppu113"><!-- column -->
-            <div class="clearfix colelem" id="pu113"><!-- group -->
-                <div class="rounded-corners clearfix grpelem" id="u113"><!-- column -->
-                    <div class="position_content" id="u113_position_content">
-                        <div class="clearfix colelem" id="u115-4"><!-- content -->
-                            <p>Concepto/Concept</p>
-                        </div>
-                        <div class="clearfix colelem" id="u116-6"><!-- content -->
-                            <p>Relacion de facturas</p>
-                            <p id="u116-4">Relationship of invoice</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="rounded-corners grpelem" id="u285"><!-- simple frame --></div>
-            </div>
-            <div class="clearfix colelem" id="pu118"><!-- group -->
-                <div class="rounded-corners clearfix grpelem" id="u118"><!-- column -->
-                    <div class="position_content" id="u118_position_content">
-                        <div class="clearfix colelem" id="u119-4"><!-- content -->
-                            <p>Factura/Invoice</p>
-                        </div>
-                        <div class="clearfix colelem" id="u120-4"><!-- content -->
-                            <p>{invoice}</p>
+                                html = """
+                                                <!DOCTYPE html>
+    <html class="html" lang="es-ES">
+    <head>
+        <meta http-equiv="Content-type" content="text/html;charset=UTF-8"/>
+        <meta name="keywords" content="hostal, turismo, cuba, habana, havana"/>
+        <meta name="generator" content="2015.0.0.309"/>
+        <title>Lodging Invoice/ Factura de Alojamiento</title>
+        <!-- CSS -->
+        <link rel="stylesheet" type="text/css" href="css/site_global.css?4052507572"/>
+        <link rel="stylesheet" type="text/css" href="css/index.css?4191106610" id="pagesheet"/>
+        <link rel="stylesheet" href="stylesheet.css">
+        <script src="config.js"></script>
+    </head>
+    <body>
+    <div class="clearfix" id="page"><!-- column -->
+        <div class="clearfix colelem" id="pppu113"><!-- group -->
+            <div class="clearfix grpelem" id="ppu113"><!-- column -->
+                <div class="clearfix colelem" id="pu113"><!-- group -->
+                    <div class="rounded-corners clearfix grpelem" id="u113"><!-- column -->
+                        <div class="position_content" id="u113_position_content">
+                            <div class="clearfix colelem" id="u115-4"><!-- content -->
+                                <p>Concepto/Concept</p>
+                            </div>
+                            <div class="clearfix colelem" id="u116-6"><!-- content -->
+                                <p>Relacion de facturas</p>
+                                <p id="u116-4">Relationship of invoice</p>
+                            </div>
                         </div>
                     </div>
+                    <div class="rounded-corners grpelem" id="u285"><!-- simple frame --></div>
                 </div>
-                <div class="rounded-corners grpelem" id="u286"><!-- simple frame --></div>
-            </div>
-            <div class="clearfix colelem" id="pu121"><!-- group -->
-                <div class="rounded-corners clearfix grpelem" id="u121"><!-- column -->
-                    <div class="position_content" id="u121_position_content">
-                        <div class="clearfix colelem" id="u122-4"><!-- content -->
-                            <p>Fecha/Date</p>
-                        </div>
-                        <div class="clearfix colelem" id="u123-4"><!-- content -->
-                            <p>{pubdate}</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="rounded-corners grpelem" id="u287"><!-- simple frame --></div>
-            </div>
-            <div class="clearfix colelem" id="pu124"><!-- group -->
-                <div class="rounded-corners clearfix grpelem" id="u124"><!-- column -->
-                    <div class="position_content" id="u124_position_content">
-                        <div class="clearfix colelem" id="u125-4"><!-- content -->
-                            <p>Usuario/User</p>
-                        </div>
-                        <div class="clearfix colelem" id="u126-4"><!-- content -->
-                            <p>{user}</p>
+                <div class="clearfix colelem" id="pu118"><!-- group -->
+                    <div class="rounded-corners clearfix grpelem" id="u118"><!-- column -->
+                        <div class="position_content" id="u118_position_content">
+                            <div class="clearfix colelem" id="u119-4"><!-- content -->
+                                <p>Factura/Invoice</p>
+                            </div>
+                            <div class="clearfix colelem" id="u120-4"><!-- content -->
+                                <p>{invoice}</p>
+                            </div>
                         </div>
                     </div>
+                    <div class="rounded-corners grpelem" id="u286"><!-- simple frame --></div>
                 </div>
-                <div class="rounded-corners grpelem" id="u288"><!-- simple frame --></div>
-            </div>
-        </div>
-        <div class="clip_frame grpelem" id="u75"><!-- image -->
-            <img class="block" id="u75_img" src="images/ledea auto air.png" alt="" width="166" height="75"/>
-        </div>
-        <div class="clearfix grpelem" id="pu81-16"><!-- column -->
-            <div class="clearfix colelem" id="u81-16"><!-- content -->
-                <p id="u81-2"><span id="u81">Dirección</span></p>
-                <p>Avenida 15 edif 8023 entre 82 y 90</p>
-                <p>Reparto Guiteras, Habana del Este, La Habana, Cuba</p>
-                <p id="u81-8"><span id="u81-7">Teléfono</span></p>
-                <p>&nbsp;7-7662316</p>
-                <p id="u81-12"><span id="u81-11">Email</span></p>
-                <p>informacion@servidorcliente.com</p>
-            </div>
-            <div class="clearfix colelem" id="pu313-10"><!-- group -->
-                <div class="clearfix grpelem" id="u313-10"><!-- content -->
-                    <p id="u313-2"><span id="u313">Developer</span></p>
-                    <p id="u313-4">Josué Isai Hernández Sánchez</p>
-                    <p id="u313-6">josueisaihs@gmail.com</p>
-                    <p id="u313-8">+53 53861204</p>
-                </div>
-                <div class="clip_frame grpelem" id="u314"><!-- image -->
-                    <img class="block" id="u314_img" src="images/logo%20elijosoft%20150.png" alt="" width="100%"
-                         style="padding-top: 30%"/>
-                </div>
-                <div class="rounded-corners clearfix grpelem" id="u318"><!-- group -->
-                    <div class="grpelem" id="u316"><!-- rasterized frame --></div>
-                </div>
-            </div>
-            <div class="clearfix colelem" id="pu313-10"><!-- group -->
-                <div class="clearfix grpelem" id="u313-10"><!-- content -->
-                    <p id="u313-4">6ta Nº204 entre Fomento y Albear, Cerro, La Habana</p>
-                    <p id="u313-6">ventas@softwaresinlimite.com</p>
-                    <p id="u313-8">+53 56142378</p>
-                </div>
-                <div class="clip_frame grpelem" id="u314"><!-- image -->
-                    <img class="block" id="u314_img" src="images/dossl.png" alt="" width="100%"
-                         style="padding-top: 30%"/>
-                </div>
-                <div class="rounded-corners clearfix grpelem" id="u318"><!-- group -->
-                    <div class="grpelem" id="u316"><!-- rasterized frame --></div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="colelem" id="u277"><!-- simple frame --></div>
-    <div class="clearfix colelem" id="u280-4"><!-- content -->
-        <p>Productos/Products</p>
-    </div>
-    <div class="colelem" id="u273"><!-- custom html -->
-        <table>
-            <tr class="inicio">
-                <td>Cliente</td>
-                <td>Telef</td>
-                <td>Condicion</td>
-                <td>Descuento</td>
-                <td>Deuda</td>
-                <td>Mano Obra</td>
-                <td>Miscelanea</td>
-                <td>Total</td>
-            </tr>
-            <tr>
-                <td>{cliente}</td>
-                <td>{telef}</td>
-                <td>Efectivo</td>
-                <td>{descuento}</td>
-                <td>{deuda}</td>
-                <td>{mano_obra}</td>
-                <td>{miscelanea}</td>
-                <td class="total">{total}</td>
-            </tr>
-        </table>
-    </div>
-    <div class="colelem" id="u275"><!-- custom html -->
-        <table>
-            <tr class="inicio">
-                <td>Fecha</td>
-                <td>Factura</td>
-                <td>Descuento</td>
-                <td>Deuda</td>
-                <td>Subtotal</td>
-            </tr>
-            {tablaDetalle}
-        </table>
-    </div>
-    <div class="clearfix colelem" id="pu278-7"><!-- group -->
-        <div class="clearfix grpelem" id="u278-7"><!-- content -->
-            <p id="u278-2">______________________</p>
-            <p id="u278-4">Firma Cliente</p>
-            <p>&nbsp;</p>
-        </div>
-        <div class="clearfix grpelem" id="u279-7"><!-- content -->
-            <p id="u279-2">______________________</p>
-            <p id="u279-4">Firma Usuario</p>
-            <p>&nbsp;</p>
-        </div>
-    </div>
-    <div class="clearfix colelem" id="pu325"><!-- group -->
-        <div class="clearfix grpelem" id="u325"><!-- column -->
-            <div class="position_content" id="u325_position_content">
-                <div class="clearfix colelem" id="u329-4"><!-- content -->
-                    <p>Recibo de Venta/Sales Voucher</p>
-                </div>
-                <div class="clearfix colelem" id="pu326-7"><!-- group -->
-                    <div class="clearfix grpelem" id="u326-7"><!-- content -->
-                        <p id="u326-2">______________________</p>
-                        <p id="u326-4">Firma Cliente</p>
-                        <p>&nbsp;</p>
+                <div class="clearfix colelem" id="pu121"><!-- group -->
+                    <div class="rounded-corners clearfix grpelem" id="u121"><!-- column -->
+                        <div class="position_content" id="u121_position_content">
+                            <div class="clearfix colelem" id="u122-4"><!-- content -->
+                                <p>Fecha/Date</p>
+                            </div>
+                            <div class="clearfix colelem" id="u123-4"><!-- content -->
+                                <p>{pubdate}</p>
+                            </div>
+                        </div>
                     </div>
-                    <div class="clearfix grpelem" id="u327-7"><!-- content -->
-                        <p id="u327-2">______________________</p>
-                        <p id="u327-4">Firma Usuario</p>
-                        <p>&nbsp;</p>
+                    <div class="rounded-corners grpelem" id="u287"><!-- simple frame --></div>
+                </div>
+                <div class="clearfix colelem" id="pu124"><!-- group -->
+                    <div class="rounded-corners clearfix grpelem" id="u124"><!-- column -->
+                        <div class="position_content" id="u124_position_content">
+                            <div class="clearfix colelem" id="u125-4"><!-- content -->
+                                <p>Usuario/User</p>
+                            </div>
+                            <div class="clearfix colelem" id="u126-4"><!-- content -->
+                                <p>{user}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="rounded-corners grpelem" id="u288"><!-- simple frame --></div>
+                </div>
+            </div>
+            <div class="clip_frame grpelem" id="u75"><!-- image -->
+                <img class="block" id="u75_img" src="images/ledea auto air.png" alt="" width="166" height="75"/>
+            </div>
+            <div class="clearfix grpelem" id="pu81-16"><!-- column -->
+                <div class="clearfix colelem" id="u81-16"><!-- content -->
+                    <p id="u81-2"><span id="u81">Dirección</span></p>
+                    <p>Avenida 15 edif 8023 entre 82 y 90</p>
+                    <p>Reparto Guiteras, Habana del Este, La Habana, Cuba</p>
+                    <p id="u81-8"><span id="u81-7">Teléfono</span></p>
+                    <p>&nbsp;7-7662316</p>
+                    <p id="u81-12"><span id="u81-11">Email</span></p>
+                    <p>informacion@servidorcliente.com</p>
+                </div>
+                <div class="clearfix colelem" id="pu313-10"><!-- group -->
+                    <div class="clearfix grpelem" id="u313-10"><!-- content -->
+                        <p id="u313-2"><span id="u313">Developer</span></p>
+                        <p id="u313-4">Josué Isai Hernández Sánchez</p>
+                        <p id="u313-6">josueisaihs@gmail.com</p>
+                        <p id="u313-8">+53 53861204</p>
+                    </div>
+                    <div class="clip_frame grpelem" id="u314"><!-- image -->
+                        <img class="block" id="u314_img" src="images/logo%20elijosoft%20150.png" alt="" width="100%"
+                             style="padding-top: 30%"/>
+                    </div>
+                    <div class="rounded-corners clearfix grpelem" id="u318"><!-- group -->
+                        <div class="grpelem" id="u316"><!-- rasterized frame --></div>
+                    </div>
+                </div>
+                <div class="clearfix colelem" id="pu313-10"><!-- group -->
+                    <div class="clearfix grpelem" id="u313-10"><!-- content -->
+                        <p id="u313-4">6ta Nº204 entre Fomento y Albear, Cerro, La Habana</p>
+                        <p id="u313-6">ventas@softwaresinlimite.com</p>
+                        <p id="u313-8">+53 56142378</p>
+                    </div>
+                    <div class="clip_frame grpelem" id="u314"><!-- image -->
+                        <img class="block" id="u314_img" src="images/dossl.png" alt="" width="100%"
+                             style="padding-top: 30%"/>
+                    </div>
+                    <div class="rounded-corners clearfix grpelem" id="u318"><!-- group -->
+                        <div class="grpelem" id="u316"><!-- rasterized frame --></div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="clearfix grpelem" id="u328-4"><!-- content -->
-            <p>Relacion de facturas: {cliente} Perido: {pubdate}</p>
+        <div class="colelem" id="u277"><!-- simple frame --></div>
+        <div class="clearfix colelem" id="u280-4"><!-- content -->
+            <p>Productos/Products</p>
         </div>
+        <div class="colelem" id="u273"><!-- custom html -->
+            <table>
+                <tr class="inicio">
+                    <td>Cliente</td>
+                    <td>Telef</td>
+                    <td>Condicion</td>
+                    <td>Descuento</td>
+                    <td>Deuda</td>
+                    <td>Mano Obra</td>
+                    <td>Miscelanea</td>
+                    <td>Total</td>
+                </tr>
+                <tr>
+                    <td>{cliente}</td>
+                    <td>{telef}</td>
+                    <td>Efectivo</td>
+                    <td>{descuento}</td>
+                    <td>{deuda}</td>
+                    <td>{mano_obra}</td>
+                    <td>{miscelanea}</td>
+                    <td class="total">{total}</td>
+                </tr>
+            </table>
+        </div>
+        <div class="colelem" id="u275"><!-- custom html -->
+            <table>
+                <tr class="inicio">
+                    <td>Fecha</td>
+                    <td>Factura</td>
+                    <td>Descuento</td>
+                    <td>Deuda</td>
+                    <td>Subtotal</td>
+                </tr>
+                {tablaDetalle}
+            </table>
+        </div>
+        <div class="clearfix colelem" id="pu278-7"><!-- group -->
+            <div class="clearfix grpelem" id="u278-7"><!-- content -->
+                <p id="u278-2">______________________</p>
+                <p id="u278-4">Firma Cliente</p>
+                <p>&nbsp;</p>
+            </div>
+            <div class="clearfix grpelem" id="u279-7"><!-- content -->
+                <p id="u279-2">______________________</p>
+                <p id="u279-4">Firma Usuario</p>
+                <p>&nbsp;</p>
+            </div>
+        </div>
+        <div class="clearfix colelem" id="pu325"><!-- group -->
+            <div class="clearfix grpelem" id="u325"><!-- column -->
+                <div class="position_content" id="u325_position_content">
+                    <div class="clearfix colelem" id="u329-4"><!-- content -->
+                        <p>Recibo de Venta/Sales Voucher</p>
+                    </div>
+                    <div class="clearfix colelem" id="pu326-7"><!-- group -->
+                        <div class="clearfix grpelem" id="u326-7"><!-- content -->
+                            <p id="u326-2">______________________</p>
+                            <p id="u326-4">Firma Cliente</p>
+                            <p>&nbsp;</p>
+                        </div>
+                        <div class="clearfix grpelem" id="u327-7"><!-- content -->
+                            <p id="u327-2">______________________</p>
+                            <p id="u327-4">Firma Usuario</p>
+                            <p>&nbsp;</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="clearfix grpelem" id="u328-4"><!-- content -->
+                <p>Relacion de facturas: {cliente} Perido: {pubdate}</p>
+            </div>
+        </div>
+        <div class="verticalspacer"></div>
     </div>
-    <div class="verticalspacer"></div>
-</div>
-</body>
-</html>""".format(
-                                invoice="-",
-                                pubdate="{} al {}".format(fecha0.isoformat(), fecha1.isoformat(), ),
-                                user=self.user,
-                                cliente=self.nombreLineEdit.text(),
-                                telef=self.telefonoLineEdit.text(),
-                                descuento=descuento,
-                                mano_obra=0.0,
-                                miscelanea=0.0,
-                                deuda=deuda,
-                                total=total,
-                                tablaDetalle=tablaDetalle,
-                            )
+    </body>
+    </html>""".format(
+                                    invoice="-",
+                                    pubdate="{} al {}".format(fecha0.isoformat(), fecha1.isoformat(), ),
+                                    user=self.user,
+                                    cliente=self.nombreLineEdit.text(),
+                                    telef=self.telefonoLineEdit.text(),
+                                    descuento=descuento,
+                                    mano_obra=0.0,
+                                    miscelanea=0.0,
+                                    deuda=deuda,
+                                    total=total,
+                                    tablaDetalle=tablaDetalle,
+                                )
 
-                            with open(os.path.join("system", "templete", "index.html"), "w", encoding="UTF-8") as file:
-                                file.write(html)
-                                file.close()
-                            os.startfile(os.path.join("system", "templete", "index.html"))
+                                with open(os.path.join("system", "templete", "index.html"), "w",
+                                          encoding="UTF-8") as file:
+                                    file.write(html)
+                                    file.close()
+                                os.startfile(os.path.join("system", "templete", "index.html"))
+                    else:
+                        QMessageBox.critical(self, "Aviso", "El cliente no ha realzado compras de {} a {}".
+                                             format(fecha0.isoformat(), fecha1.isoformat(), ))
         # <> fin DialogNewClientLayout
 
 
