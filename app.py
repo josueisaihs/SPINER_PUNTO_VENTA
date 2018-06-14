@@ -1174,12 +1174,14 @@ try:
             <div class="clearfix grpelem" id="pu81-16"><!-- column -->
                  <div class="clearfix colelem" id="u81-16"><!-- content -->
                   <p id="u81-2"><span id="u81">Dirección</span></p>
-                  <p>Avenida 15 edif 8023 entre 82 y 90</p>
-                  <p>Reparto Guiteras, Habana del Este, La Habana, Cuba</p>
+                  <p>Calle Reina 55 entre Ángeles y Águila, Planta Alta</p>
+                  <p>Centro Habana, La Habana, Cuba</p>
                   <p id="u81-8"><span id="u81-7">Teléfono</span></p>
-                  <p>&nbsp;7-7662316</p>
+                  <p>&nbsp;+53 53342668</p>
+                  <p>&nbsp;+53 52958250</p>
                   <p id="u81-12"><span id="u81-11">Email</span></p>
-                  <p>informacion@servidorcliente.com</p>
+                  <p>mueblesatlantis.habana@gmail.com</p>
+                  <p>www.facebook.com/muebles atlantis cuba</p>
                  </div>
                  <div class="clearfix colelem" id="pu313-10"><!-- group -->
                   <div class="clearfix grpelem" id="u313-10"><!-- content -->
@@ -1207,7 +1209,7 @@ try:
                   <div class="rounded-corners clearfix grpelem" id="u318"><!-- group -->
                    <div class="grpelem" id="u316"><!-- rasterized frame --></div>
                   </div>
-                 </div>
+                 </div> 
                 </div>
                </div>
            <div class="colelem" id="u277"><!-- simple frame --></div>
