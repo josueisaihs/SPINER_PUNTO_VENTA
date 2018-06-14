@@ -54,7 +54,7 @@ try:
                 return self.db0.fetchall()
 
             def factoryInsert(self, text):
-                self.db0.execute("INSERT OR IGNORE INTO Factorys(factorys) VALUES (?)", [text])
+                self.db0.execute("INSERT OR IGNORE INTO Factorys(factory) VALUES (?)", [text])
                 self.commit()
                 return self.db0.lastrowid != 0
 
@@ -1634,10 +1634,22 @@ try:
                                              "<font color='red'>Nueva Categoría ya existe !</font>")
 
             def categoriaChanged(self, i):
+                self.categoriaComboBox.itemText(i)
                 id = self.classifyQuery(SELECT="Classify.codeFab", QUERY=" AND Components.component == '{}'".format(
                     self.categoriaComboBox.itemText(i)))
                 if id.__len__() > 0:
                     id = id[0][0][:2]
+                    self.codigoLineEdit.setText(id)
+                    self.modeloLineEdit.setText("{}-{}".format(
+                        id, int(self.sequenceQuery(SELECT="seq", QUERY=" AND name == 'Classify'")[0]) + 1001))
+                else:
+                    split = self.categoriaComboBox.itemText(i).split(" ")
+                    if len(split) > 1:
+                        id = split[0][0] + split[1][0]
+                    else:
+                        id = split[0][:2]
+                    id = id.upper()
+
                     self.codigoLineEdit.setText(id)
                     self.modeloLineEdit.setText("{}-{}".format(
                         id, int(self.sequenceQuery(SELECT="seq", QUERY=" AND name == 'Classify'")[0]) + 1001))
@@ -1666,12 +1678,15 @@ try:
                 newProduct.set_detail(self.descripcionTextEdit.toPlainText())
 
                 if self.imagenLabel_2.text() != "":
-                    cf(self.imagenLabel_2.text(), os.path.join("system", "media", "{}.{}".
+                    nom = self.codigoLineEdit.text().replace("-", "")
+                    nom = nom.lower()
+                    cf(self.imagenLabel_2.text(), os.path.join("system", "media", "300px", "{}.{}".
                                                                format(
-                        self.modeloLineEdit.text(), imghdr.what(self.imagenLabel_2.text()))))
+                        nom, imghdr.what(self.imagenLabel_2.text()))))
 
                 if self.classifyInsert([newProduct]):
                     QMessageBox.information(self, "Aviso", "Nuevo producto creado satisfactoriamente !")
+                    self.accept()
                 else:
                     QMessageBox.critical(self, "Error", "Nuevo producto no ha sido creado :(")
 
@@ -1736,6 +1751,8 @@ try:
                 item = QListWidgetItem()
                 if os.path.exists(os.path.join("system", "media", "300px", "{}.jpg".format(img))):
                     item.setIcon(QIcon(os.path.join("system", "media", "300px", "{}.jpg".format(img))))
+                elif os.path.exists(os.path.join("system", "media", "300px", "{}.png".format(img))):
+                    item.setIcon(QIcon(os.path.join("system", "media", "300px", "{}.png".format(img))))
                 else:
                     item.setIcon(QIcon(os.path.join("system", "media", "300px", "vacio.jpg")))
                 text = "Code: {codigo}\nModel: {modelo}\n\n{detalle}...". \
@@ -2056,7 +2073,7 @@ try:
                     self.makeTreeWidget.addTopLevelItem(item)
 
                 kardex = self.kardexClassifyQuery(QUERY="AND C.codeCom == '{}'".format(self.producto.get_codCom()))
-                sales = self.salesClassifyQuery(SELECT="El.time, 'Sales', Cs.cant", QUERY="AND C.codeCom == '{}'".
+                sales = self.salesClassifyQuery(SELECT="El.time, 'Ventas', Cs.cant", QUERY="AND C.codeCom == '{}'".
                                                 format(self.producto.get_codCom()))
                 lista = []
                 lista.extend(kardex.kardexDetalle)
@@ -2068,7 +2085,7 @@ try:
                         elem.append(str(k))
 
                     item = QTreeWidgetItem(elem)
-                    if elem[1] == "Sales":
+                    if elem[1] == "Ventas":
                         icon = QIcon(os.path.join("system", "image", "status_malo.png"))
                     else:
                         icon = QIcon(os.path.join("system", "image", "status_bueno.png"))

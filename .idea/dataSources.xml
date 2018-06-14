@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="dataBase.sqlite3" uuid="28272e06-2251-47f6-9a94-bc4aea4aad57">
+    <data-source source="LOCAL" name="dataBase.sqlite3" uuid="6a9327b5-e550-4054-91e2-4799e8b79fa7">
       <driver-ref>sqlite.xerial</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
-      <jdbc-url>jdbc:sqlite:D:\Negocios\Contratos Freelancer\DOSSL\SPINER\system\data\dataBase.sqlite3</jdbc-url>
+      <jdbc-url>jdbc:sqlite:D:\Negocios\Contratos Freelancer\DOSSL\SPINER_PUNTO_VENTA\system\data\dataBase.sqlite3</jdbc-url>
       <driver-properties>
         <property name="enable_load_extension" value="true" />
       </driver-properties>

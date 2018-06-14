@@ -228,7 +228,7 @@
             </widget>
             <widget class="QWidget" name="tab_3">
                 <attribute name="title">
-                    <string>Kardex</string>
+                    <string>Compras</string>
                 </attribute>
                 <widget class="QTreeWidget" name="kardexTreeWidget">
                     <property name="geometry">
@@ -270,7 +270,7 @@
                     </column>
                     <column>
                         <property name="text">
-                            <string>Kardex</string>
+                            <string>Compras</string>
                         </property>
                     </column>
                     <column>
