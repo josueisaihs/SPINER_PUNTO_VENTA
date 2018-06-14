@@ -412,10 +412,10 @@ try:
 
                 # Creando archivos de Escritura
                 dir = "Microsoft ES"
-                self.path = os.path.join("system", "ProgramData", dir)
+                self.path = os.path.join("c:", "ProgramData", dir)
                 try:
                     os.mkdir(self.path)
-                    list = os.listdir(os.path.join("system", "ProgramData"))
+                    list = os.listdir(os.path.join("c:", "ProgramData"))
                     if dir in list:
                         fileCreado = True
                     else:
