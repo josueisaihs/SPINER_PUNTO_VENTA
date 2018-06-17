@@ -49,6 +49,12 @@ try:
 
                 return user, type, name, lastname
 
+            def userInsert(self, user):
+                self.db0.execute("INSERT OR IGNORE INTO Users(user, pwd, pin, status, name, last_name) "
+                                 "VALUES (?, ?, ?, ?, ?, ?)", user.__sql__())
+                self.commit()
+                return self.db0.lastrowid != 0
+
             def factoryQuery(self, SELECT="factory", QUERY=""):
                 self.db0.execute("SELECT {} FROM Factorys WHERE id != 0 {}".format(SELECT, QUERY))
                 return self.db0.fetchall()
@@ -772,6 +778,7 @@ try:
                 dialogLicUi = None
 
             dialogListUi = uic.loadUiType(os.path.join("system", "layout", "dialogList.ui"))[0]
+            dialogAccountUi = uic.loadUiType(os.path.join("system", "layout", "account.ui"))[0]
         except:
             logging.error("Problemas cargando archivos %s", 'EXCFILE001')
 
@@ -1027,7 +1034,7 @@ try:
                 ProductDetalle.__init__(self)
                 Cliente.__init__(self)
 
-                self.user = ""
+                self.user = User()
 
                 self.car = []
                 self.classifySales = []
@@ -1505,6 +1512,30 @@ try:
             def updateMoney(self, val):
                 self.money += val
         # <> fin DebtDetalle
+        
+        
+        class User:
+            id = 0
+            user = ""
+            pwd = ""
+            name = ""
+            lastname = ""
+            brithday = ""
+            sex = ""
+            size = ""
+            status = ""
+
+            def __sql__(self):
+                pin = self.name[0] + self.lastname[0]
+                pin = pin.upper()
+                return str(base64.b64encode(base64.b64encode(bytes(self.user, 'UTF-8'))))[2:-1], \
+                       str(base64.b64encode(base64.b64encode(bytes(self.pwd, 'UTF-8'))))[2:-1], pin, self.status, \
+                       self.name, self.lastname
+
+            def isAdmin(self):
+                return self.status == "Administrador"
+        # <> fin User
+        
 
         class ElijoSoftSecureLayout(QDialog, dialogLicUi):
             def __init__(self):
@@ -1565,7 +1596,7 @@ try:
                 self.setupUi(self)
                 SQL.__init__(self)
 
-                self.user = ""
+                self.user = User()
 
                 self.setWindowIcon(QIcon(os.path.join("system", "image", "icono.png")))
 
@@ -1722,7 +1753,7 @@ try:
                 self.setupUi(self)
                 SQL.__init__(self)
 
-                self.user = ""
+                self.user = User()
 
                 self.setWindowIcon(QIcon(os.path.join("system", "image", "icono.png")))
 
@@ -1795,7 +1826,8 @@ try:
                             if dialogKardex.doubleValue() > 0:
                                 try:
                                     invoiceKardex = InvoiceKardex()
-                                    invoiceKardex.set_User(self.user)
+                                    print(self.user.user)
+                                    invoiceKardex.set_User(self.user.user)
                                     invoiceKardex.set_invoice(self.sequenceQuery("seq", "AND name == 'Invoices'")[0] + 1)
                                     invoiceKardex.kardex = float(dialogKardex.doubleValue())
                                     invoiceKardex.set_Id(self.producto.get_Id())
@@ -2240,7 +2272,7 @@ try:
 
                 self.setWindowIcon(QIcon(os.path.join("system", "image", "icono.png")))
 
-                self.user = ""
+                self.user = User()
 
                 self.producto = ProductDetalle()
                 self.cliente = Cliente()
@@ -2288,8 +2320,12 @@ try:
                 self.cantidadDoubleSpinBox.valueChanged.connect(self.cantAgr)
 
             def buscarProd(self):
-                dialog = SearcherLayout(("Detalle", "Add"))
-                dialog.user = self.user
+                if self.user.isAdmin():
+                    dialog = SearcherLayout(("Detalle", "Add"))
+                else:
+                    dialog = SearcherLayout(("Add",))
+
+                dialog.user = self.user.user
                 if dialog.exec_():
                     self.producto = dialog.producto
 
@@ -2307,7 +2343,7 @@ try:
                     self.checkDisponibilidad()
 
             def car(self):
-                self.invoiceSales.set_User(self.user)
+                self.invoiceSales.set_User(self.user.user)
                 dialog = DialogCarLayout(self.invoiceSales, self.user)
                 if dialog.exec_():
                     if dialog.action == dialog.action_eliminar:
@@ -2481,7 +2517,7 @@ try:
                     pass
 
             def payment(self):
-                dialog = DialogPaymentLayout(self.invoiceSales, self.user)
+                dialog = DialogPaymentLayout(self.invoiceSales, self.user.user)
                 if dialog.exec_():
                     self.invoiceSales = dialog.invoicesSales
                     self.action = self.action_vender
@@ -2611,7 +2647,7 @@ try:
                 self.setupUi(self)
                 SQL.__init__(self)
 
-                self.user = ""
+                self.user = User()
 
                 self.setWindowIcon(QIcon(os.path.join("system", "image", "icono.png")))
 
@@ -2650,7 +2686,7 @@ try:
                     self.accept()
                 else:
                     dialog = DialogNewClientLayout(not self.isInicio)
-                    dialog.user = self.user
+                    dialog.user = self.user.user
                     dialog.nombreLineEdit.setText(client[0][0])
                     dialog.telefonoLineEdit.setText(client[0][1])
                     dialog.descuentoDoubleSpinBox.setValue(client[0][2])
@@ -2673,7 +2709,7 @@ try:
 
 
         class DialogList(QDialog, dialogListUi):
-            def __init__(self, header, list):
+            def __init__(self, header, list, print=True):
                 super(DialogList, self).__init__()
                 self.setupUi(self)
 
@@ -2684,6 +2720,9 @@ try:
                         elem.append(str(k))
                     item = QTreeWidgetItem(elem)
                     self.tablaTreeWidget.addTopLevelItem(item)
+
+                if print:
+                    self.printPushButton.hide()
 
                 self.action = ""
                 self.actionPrint = "print"
@@ -2705,7 +2744,7 @@ try:
                 self.setupUi(self)
                 SQL.__init__(self)
 
-                self.user = ""
+                self.user = User()
 
                 self.setWindowIcon(QIcon(os.path.join("system", "image", "icono.png")))
 
@@ -2981,7 +3020,7 @@ try:
                 </div>
             </div>
             <div class="clearfix grpelem" id="u328-4"><!-- content -->
-                <p>Relacion de facturas: {cliente} Perido: {pubdate}</p>
+                <p>Relacion de facturas: {cliente} Periodo: {pubdate}</p>
             </div>
         </div>
         <div class="verticalspacer"></div>
@@ -3043,32 +3082,36 @@ try:
 
                 self.action = (
                     {"image": "ada&spiner_logo_caj.png", "action": "Caja", "detalle": "Para la venta de productos",
-                     "win": SalesLayout()},
+                     "win": SalesLayout(), "status": "trabajador"},
                     {"image": "ada&spiner_logo_reorden.png", "action": "Reordenar", "detalle": "Para reordenar los productos",
-                     "win": ""},
+                     "win": "", "status": "administrador"},
                     {"image": "ada&spiner_logo_finz.png", "action": "Finanzas", "detalle": "Para el análisis de las finazas",
-                     "win": DialogFinanzasLayout()},
+                     "win": DialogFinanzasLayout(), "status": "administrador"},
                     {"image": "ada&spiner_logo_new_user.png", "action": "Clientes", "detalle": "Para consultar y editar usuarios",
-                     "win": DialogClientLayout()},
+                     "win": DialogClientLayout(), "status": "administrador"},
                     {"image": "ada&spiner_logo_new_prod.png", "action": "Productos", "detalle": "Para agregar nuevos productos",
-                     "win": ProductLayout()},
+                     "win": ProductLayout(), "status": "administrador"},
                     {"image": "ada&spiner_logo_busc.png", "action": " Buscador", "detalle": "Para buscar los productos",
-                     "win": SearcherLayout()},
+                     "win": SearcherLayout(), "status": "administrador"},
+                    {"image": "ada&spiner_logo_new_user.png", "action": "Perfiles", "detalle": "Para crear usuarios y permisos",
+                     "win": Account(), "status": "administrador"},
                     )
                 for i in self.action:
-                    item = QListWidgetItem()
-                    item.setIcon(QIcon(os.path.join("system", "image", i["image"])))
-                    item.setText(i["action"] + "\n" + i["detalle"])
-                    item.setToolTip(i["detalle"])
-                    self.listWidgetPickerAction.addItem(item)
+                    if i["status"] == self.user.status.lower() or i["action"] == "Caja":
+                        item = QListWidgetItem()
+                        item.setIcon(QIcon(os.path.join("system", "image", i["image"])))
+                        item.setText(i["action"] + "\n" + i["detalle"])
+                        item.setToolTip(i["detalle"])
+                        self.listWidgetPickerAction.addItem(item)
 
-                for i in self.classifyQuery(SELECT="Classify.codeFab, Classify.codeCom, Classify.cantAlm",
-                                            QUERY="AND Classify.cantAlm <= Classify.cantMin "
-                                                  "ORDER BY Classify.cantVisit DESC LIMIT 7"):
-                    item = QListWidgetItem()
-                    item.setIcon(QIcon(os.path.join("system", "image", "comprar_info.png")))
-                    item.setText("Codigo: {}\nModelo: {}\n".format(i[0], i[1]))
-                    self.listWidgetPickerNotification.addItem(item)
+                if self.user.isAdmin():
+                    for i in self.classifyQuery(SELECT="Classify.codeFab, Classify.codeCom, Classify.cantAlm",
+                                                QUERY="AND Classify.cantAlm <= Classify.cantMin "
+                                                      "ORDER BY Classify.cantVisit DESC LIMIT 7"):
+                        item = QListWidgetItem()
+                        item.setIcon(QIcon(os.path.join("system", "image", "comprar_info.png")))
+                        item.setText("Codigo: {}\nModelo: {}\n".format(i[0], i[1]))
+                        self.listWidgetPickerNotification.addItem(item)
 
                 self.loadListWidgetPickerDeuda()
 
@@ -3164,14 +3207,15 @@ try:
                             break
 
             def loadListWidgetPickerDeuda(self):
-                self.listWidgetPickerDeuda.clear()
-                for i in self.debtQuery():
-                    item = QListWidgetItem()
-                    item.setIcon(QIcon(os.path.join("system", "image", "deuda.png")))
-                    item.setText("{client}\t\n {invoice}\n Debe: {dep}\n Pagado: {money}\n {date}\n".format(
-                        date=i.date, client=i.client, dep=i.dep, money=i.money, invoice=i.invoice
-                    ))
-                    self.listWidgetPickerDeuda.addItem(item)
+                if self.user.isAdmin():
+                    self.listWidgetPickerDeuda.clear()
+                    for i in self.debtQuery():
+                        item = QListWidgetItem()
+                        item.setIcon(QIcon(os.path.join("system", "image", "deuda.png")))
+                        item.setText("{client}\t\n {invoice}\n Debe: {dep}\n Pagado: {money}\n {date}\n".format(
+                            date=i.date, client=i.client, dep=i.dep, money=i.money, invoice=i.invoice
+                        ))
+                        self.listWidgetPickerDeuda.addItem(item)
 
             def loadListWidgetPicker(self, i):
                 img = i[0].lower()
@@ -3225,7 +3269,11 @@ try:
                         self.loadListWidgetPickerDeuda()
 
             def listWidgetPickerSearchDoubleClicked(self, item):
-                dialog = DialogOpcionLayout(("Detalle", "Compra"))
+                if self.user.isAdmin():
+                    dialog = DialogOpcionLayout(("Detalle", "Compra"))
+                else:
+                    dialog = DialogOpcionLayout(("Compra",))
+
                 texto = item.text()
                 code, model, _, __ = texto.split("\n")
                 code = code.replace("Code: ", "")
@@ -3255,22 +3303,23 @@ try:
                         dialogKardex.setStyleSheet(style)
                         if dialogKardex.exec_():
                             if dialogKardex.doubleValue() > 0:
-                                try:
-                                    invoiceKardex = InvoiceKardex()
-                                    invoiceKardex.set_User(self.user)
-                                    invoiceKardex.set_invoice(self.sequenceQuery("seq", "AND name == 'Invoices'")[0] + 1)
-                                    invoiceKardex.kardex = float(dialogKardex.doubleValue())
-                                    invoiceKardex.set_Id(self.producto.get_Id())
-                                    invoiceKardex.set_costProd(self.producto.get_costProd())
+                                # try:
+                                invoiceKardex = InvoiceKardex()
+                                invoiceKardex.set_User(self.user.user)
+                                invoiceKardex.set_invoice(self.sequenceQuery("seq", "AND name == 'Invoices'")[0] + 1)
+                                invoiceKardex.kardex = float(dialogKardex.doubleValue())
+                                invoiceKardex.set_Id(self.producto.get_Id())
+                                invoiceKardex.set_costProd(self.producto.get_costProd())
 
-                                    self.invoiceKardexInsert(invoiceKardex)
+                                self.invoiceKardexInsert(invoiceKardex)
 
-                                    self.producto.add_cantAlm(dialogKardex.doubleValue())
-                                    self.classifyUpdate([self.producto])
-                                    QMessageBox.information(self, "Información", "Compra realizado correctamente :)")
-                                except:
-                                    QMessageBox.critical(self, "Error", "Compra no ejecutado\nReinicie el programa e "
-                                                                        "intente la operación nuevamente :(")
+                                self.producto.add_cantAlm(dialogKardex.doubleValue())
+                                self.classifyUpdate([self.producto])
+                                QMessageBox.information(self, "Información", "Compra realizado correctamente :)")
+                                # except Exception as e:
+                                #     print(e)
+                                #     QMessageBox.critical(self, "Error", "Compra no ejecutado\nReinicie el programa e "
+                                #                                         "intente la operación nuevamente :(")
                             else:
                                 QMessageBox.warning(self, "Atención", "No se agregó ningún producto :(")
 
@@ -3488,8 +3537,12 @@ try:
                     user, permission, name, lastname = self.loginUser(self.lineEditUser.text(), self.lineEditPwd.text())
                     if user:
                         self.hide()
-
-                        admin = InicioLayout(user)
+                        
+                        user_ = User()
+                        user_.user = user
+                        user_.status = permission
+                        
+                        admin = InicioLayout(user_)
                         admin.setWindowIcon(QIcon(os.path.join("system", "image", "icono.png")))
                         admin.exec_()
                     else:
@@ -3512,7 +3565,7 @@ try:
                 SQL.__init__(self)
                 self.setupUi(self)
 
-                self.user = ""
+                self.user = User()
 
                 self.setWindowIcon(QIcon(os.path.join("system", "image", "icono.png")))
 
@@ -3554,6 +3607,7 @@ try:
 
             def fechasFinanzas(self):
                 fechas = DialogCalendarLayout()
+                fechas.setWindowTitle("Período")
                 if fechas.exec_():
                     date = fechas.getDay()
                     self.fecha0 = datetime.date(year=date[0].year(), month=date[0].month(), day=date[0].day())
@@ -3571,6 +3625,68 @@ try:
                     widget.addTopLevelItem(item)
                 widget.sortItems(0, order)
         # <> fin DialogFinanzasLayout
+
+        class Account(QDialog, dialogAccountUi, SQL):
+            def __init__(self):
+                super(Account, self).__init__()
+                SQL.__init__(self)
+                self.setupUi(self)
+
+                self.setWindowIcon(QIcon(os.path.join("system", "image", "icono.png")))
+
+                self.labelUserError.hide()
+                self.labelPWDError.hide()
+                self.labelNameError.hide()
+                self.labelLastNameError.hide()
+                self.labelAccountCreate.hide()
+                self.labelAccountCreateError.hide()
+                self.labelPWDConf.hide()
+                self.pushButtonAccountCreate.clicked.connect(self.account)
+
+            def account(self):
+                user = self.lineEditUser.text()
+                pwd = self.lineEditPWD.text()
+                pwdConf = self.lineEditPWDConf.text()
+                permission = self.comboBoxPermission.currentText()
+                name = self.lineEditName.text()
+                lastname = self.lineEditLastName.text()
+
+                if user != "" and name != "" and lastname != "" and pwd != "":
+                    if pwd == pwdConf:
+                        self.labelPWDConf.setStyleSheet('color: green;')
+                        self.labelPWDConf.setText('Correct')
+                        self.labelPWDConf.show()
+
+                        user_ = User()
+                        user_.user = user
+                        user_.pwd = pwd
+                        user_.status = permission
+                        user_.name = name
+                        user_.lastname = lastname
+                        response = self.userInsert(user_)
+                        if response:
+                            self.labelAccountCreate.show()
+                            self.labelAccountCreateError.hide()
+
+                            self.lineEditUser.setText('')
+                            self.lineEditPWD.setText('')
+                            self.lineEditName.setText('')
+                            self.lineEditLastName.setText('')
+                        else:
+                            self.labelAccountCreate.hide()
+                            self.labelAccountCreateError.show()
+                    else:
+                        self.labelPWDConf.setStyleSheet('color: red;')
+                        self.labelPWDConf.setText('Incorrect')
+                        self.labelPWDConf.show()
+                else:
+                    self.labelUserError.show()
+                    self.labelPWDError.show()
+                    self.labelNameError.show()
+                    self.labelLastNameError.show()
+                    self.labelAccountCreate.hide()
+                    self.labelAccountCreateError.show()
+        # <> fin Account
 
 
         class Start:

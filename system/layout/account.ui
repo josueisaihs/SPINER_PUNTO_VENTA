@@ -1,35 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
-    <class>AccountWindow</class>
-    <widget class="QMainWindow" name="AccountWindow">
-        <property name="windowModality">
-            <enum>Qt::WindowModal</enum>
-        </property>
-        <property name="geometry">
-            <rect>
-                <x>0</x>
-                <y>0</y>
-                <width>329</width>
-                <height>486</height>
-            </rect>
-        </property>
-        <property name="minimumSize">
-            <size>
-                <width>0</width>
-                <height>0</height>
-            </size>
-        </property>
-        <property name="maximumSize">
-            <size>
-                <width>334</width>
-                <height>583</height>
-            </size>
-        </property>
-        <property name="windowTitle">
-            <string>Account</string>
-        </property>
-        <property name="styleSheet">
-            <string notr="true">QMainWindow, QDialog{
+ <class>Dialog</class>
+ <widget class="QDialog" name="Dialog">
+  <property name="windowModality">
+   <enum>Qt::ApplicationModal</enum>
+  </property>
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>330</width>
+    <height>440</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>330</width>
+    <height>440</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>330</width>
+    <height>440</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>Nuevo Perfil</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">QMainWindow, QDialog{
                 background-color: rgb(255, 255, 255);
                 }
 
@@ -66,12 +66,22 @@
                 }
 
                 /*******QLineEdit************/
+                QTextEdit {
+                font: 10pt;
+                color: rgb(120, 120, 120);
+                border: 1px solid rgb(156, 156, 156);
+                border-radius: 0px;
+                padding: 2px;
+                }
                 QLineEdit, QDateEdit, QDoubleSpinBox, QSpinBox{
                 font: 10pt;
                 color: rgb(120, 120, 120);
                 border: 1px solid rgb(156, 156, 156);
                 border-radius: 0px;
                 padding: 2px;
+                border-top: 1px white;
+                border-left: 1px white;
+                border-right: 1px white;
                 }
                 /********QComboBox*******/
                 QComboBox{
@@ -81,6 +91,9 @@
                 padding: 2px;
                 selection-background-color: white;
                 selection-color: rgb(120, 120, 120);
+                border-top: 1px white;
+                border-left: 1px white;
+                border-right: 1px white;
                 }
                 QComboBox QAbstractItemView
                 {
@@ -88,17 +101,25 @@
                 color:rgb(120, 120, 120);
                 padding: 4px;
                 border: 1px solid rgb(156, 156, 156);
+                border-top: 1px white;
+                border-left: 1px white;
+                border-right: 1px white;
                 }
 
                 QLineEdit:hover, QDateEdit:hover, QDoubleSpinBox:hover, QComboBox:hover
                 {
                 color: rgb(85, 170, 255);
-                border: 1px solid rgb(85, 170, 255);
+                border: 2px solid rgb(85, 170, 255);
+                border-top: 1px white;
+                border-left: 1px white;
+                border-right: 1px white;
                 }
 
                 QLineEdit:focus, QDateEdit:focus, QDoubleSpinBox:focus, QComboBox:focus
                 {
-                border-color: rgb(90,200,255);
+                border-top: 1px white;
+                border-left: 1px white;
+                border-right: 1px white;
                 }
 
                 QToolTip
@@ -152,288 +173,287 @@
                 selection-color: rgb(156, 156, 156);
                 }
             </string>
+  </property>
+  <property name="modal">
+   <bool>true</bool>
+  </property>
+  <widget class="QWidget" name="verticalLayoutWidget">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>10</y>
+     <width>311</width>
+     <height>421</height>
+    </rect>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <widget class="QLabel" name="label">
+      <property name="styleSheet">
+       <string notr="true">font: 12pt;</string>
+      </property>
+      <property name="text">
+       <string>Perfil</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <layout class="QFormLayout" name="formLayout">
+      <property name="fieldGrowthPolicy">
+       <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+      </property>
+      <property name="horizontalSpacing">
+       <number>5</number>
+      </property>
+      <property name="verticalSpacing">
+       <number>5</number>
+      </property>
+      <property name="leftMargin">
+       <number>5</number>
+      </property>
+      <property name="topMargin">
+       <number>5</number>
+      </property>
+      <property name="rightMargin">
+       <number>5</number>
+      </property>
+      <property name="bottomMargin">
+       <number>5</number>
+      </property>
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_4">
+        <property name="text">
+         <string>Usuario</string>
         </property>
-        <widget class="QWidget" name="centralwidget">
-            <widget class="QWidget" name="verticalLayoutWidget">
-                <property name="geometry">
-                    <rect>
-                        <x>10</x>
-                        <y>10</y>
-                        <width>311</width>
-                        <height>421</height>
-                    </rect>
-                </property>
-                <layout class="QVBoxLayout" name="verticalLayout">
-                    <item>
-                        <widget class="QLabel" name="label">
-                            <property name="styleSheet">
-                                <string notr="true">font: 12pt;</string>
-                            </property>
-                            <property name="text">
-                                <string>Perfil</string>
-                            </property>
-                        </widget>
-                    </item>
-                    <item>
-                        <layout class="QFormLayout" name="formLayout">
-                            <property name="fieldGrowthPolicy">
-                                <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
-                            </property>
-                            <property name="horizontalSpacing">
-                                <number>5</number>
-                            </property>
-                            <property name="verticalSpacing">
-                                <number>5</number>
-                            </property>
-                            <property name="margin">
-                                <number>5</number>
-                            </property>
-                            <item row="0" column="0">
-                                <widget class="QLabel" name="label_4">
-                                    <property name="text">
-                                        <string>User</string>
-                                    </property>
-                                </widget>
-                            </item>
-                            <item row="0" column="1">
-                                <widget class="QLineEdit" name="lineEditUser">
-                                    <property name="styleSheet">
-                                        <string notr="true">border-top: 1px white;
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="lineEditUser">
+        <property name="styleSheet">
+         <string notr="true">border-top: 1px white;
                                             border-left: 1px white;
                                             border-right: 1px white;
                                         </string>
-                                    </property>
-                                    <property name="maxLength">
-                                        <number>20</number>
-                                    </property>
-                                </widget>
-                            </item>
-                            <item row="1" column="1">
-                                <widget class="QLabel" name="labelUserError">
-                                    <property name="styleSheet">
-                                        <string notr="true">color: red;</string>
-                                    </property>
-                                    <property name="text">
-                                        <string>*</string>
-                                    </property>
-                                </widget>
-                            </item>
-                            <item row="2" column="0">
-                                <widget class="QLabel" name="label_7">
-                                    <property name="text">
-                                        <string>Password</string>
-                                    </property>
-                                </widget>
-                            </item>
-                            <item row="2" column="1">
-                                <widget class="QLineEdit" name="lineEditPWD">
-                                    <property name="styleSheet">
-                                        <string notr="true">border-top: 1px white;
+        </property>
+        <property name="maxLength">
+         <number>20</number>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QLabel" name="labelUserError">
+        <property name="styleSheet">
+         <string notr="true">color: red;</string>
+        </property>
+        <property name="text">
+         <string>*</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="label_7">
+        <property name="text">
+         <string>Contraseña</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QLineEdit" name="lineEditPWD">
+        <property name="styleSheet">
+         <string notr="true">border-top: 1px white;
                                             border-left: 1px white;
                                             border-right: 1px white;
                                         </string>
-                                    </property>
-                                    <property name="maxLength">
-                                        <number>20</number>
-                                    </property>
-                                    <property name="echoMode">
-                                        <enum>QLineEdit::Password</enum>
-                                    </property>
-                                </widget>
-                            </item>
-                            <item row="3" column="1">
-                                <widget class="QLabel" name="labelPWDError">
-                                    <property name="styleSheet">
-                                        <string notr="true">color: red;</string>
-                                    </property>
-                                    <property name="text">
-                                        <string>*</string>
-                                    </property>
-                                </widget>
-                            </item>
-                            <item row="4" column="0">
-                                <widget class="QLabel" name="label_8">
-                                    <property name="text">
-                                        <string>Confirm</string>
-                                    </property>
-                                </widget>
-                            </item>
-                            <item row="4" column="1">
-                                <widget class="QLineEdit" name="lineEditPWDConf">
-                                    <property name="styleSheet">
-                                        <string notr="true">border-top: 1px white;
+        </property>
+        <property name="maxLength">
+         <number>20</number>
+        </property>
+        <property name="echoMode">
+         <enum>QLineEdit::Password</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QLabel" name="labelPWDError">
+        <property name="styleSheet">
+         <string notr="true">color: red;</string>
+        </property>
+        <property name="text">
+         <string>*</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="label_8">
+        <property name="text">
+         <string>Confirmar</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1">
+       <widget class="QLineEdit" name="lineEditPWDConf">
+        <property name="styleSheet">
+         <string notr="true">border-top: 1px white;
                                             border-left: 1px white;
                                             border-right: 1px white;
                                         </string>
-                                    </property>
-                                    <property name="maxLength">
-                                        <number>20</number>
-                                    </property>
-                                    <property name="echoMode">
-                                        <enum>QLineEdit::Password</enum>
-                                    </property>
-                                </widget>
-                            </item>
-                            <item row="5" column="1">
-                                <widget class="QLabel" name="labelPWDConf">
-                                    <property name="styleSheet">
-                                        <string notr="true">color: red;</string>
-                                    </property>
-                                    <property name="text">
-                                        <string>Txt</string>
-                                    </property>
-                                </widget>
-                            </item>
-                            <item row="6" column="0">
-                                <widget class="QLabel" name="label_9">
-                                    <property name="text">
-                                        <string>Permission</string>
-                                    </property>
-                                </widget>
-                            </item>
-                            <item row="6" column="1">
-                                <widget class="QComboBox" name="comboBoxPermission">
-                                    <property name="styleSheet">
-                                        <string notr="true">border-top: 1px white;
+        </property>
+        <property name="maxLength">
+         <number>20</number>
+        </property>
+        <property name="echoMode">
+         <enum>QLineEdit::Password</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="1">
+       <widget class="QLabel" name="labelPWDConf">
+        <property name="styleSheet">
+         <string notr="true">color: red;</string>
+        </property>
+        <property name="text">
+         <string>Txt</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="0">
+       <widget class="QLabel" name="label_9">
+        <property name="text">
+         <string>Permiso</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="1">
+       <widget class="QComboBox" name="comboBoxPermission">
+        <property name="styleSheet">
+         <string notr="true">border-top: 1px white;
                                             border-left: 1px white;
                                             border-right: 1px white;
                                         </string>
-                                    </property>
-                                    <item>
-                                        <property name="text">
-                                            <string>Usuario</string>
-                                        </property>
-                                    </item>
-                                    <item>
-                                        <property name="text">
-                                            <string>Trabajador</string>
-                                        </property>
-                                    </item>
-                                </widget>
-                            </item>
-                            <item row="7" column="0">
-                                <widget class="QLabel" name="label_2">
-                                    <property name="text">
-                                        <string>Name</string>
-                                    </property>
-                                </widget>
-                            </item>
-                            <item row="7" column="1">
-                                <widget class="QLineEdit" name="lineEditName">
-                                    <property name="styleSheet">
-                                        <string notr="true">border-top: 1px white;
+        </property>
+        <item>
+         <property name="text">
+          <string>Usuario</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Trabajador</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="7" column="0">
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>Nombre</string>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="1">
+       <widget class="QLineEdit" name="lineEditName">
+        <property name="styleSheet">
+         <string notr="true">border-top: 1px white;
                                             border-left: 1px white;
                                             border-right: 1px white;
                                         </string>
-                                    </property>
-                                    <property name="maxLength">
-                                        <number>20</number>
-                                    </property>
-                                </widget>
-                            </item>
-                            <item row="8" column="1">
-                                <widget class="QLabel" name="labelNameError">
-                                    <property name="styleSheet">
-                                        <string notr="true">color: red;</string>
-                                    </property>
-                                    <property name="text">
-                                        <string>*</string>
-                                    </property>
-                                </widget>
-                            </item>
-                            <item row="9" column="0">
-                                <widget class="QLabel" name="label_3">
-                                    <property name="text">
-                                        <string>Last Name</string>
-                                    </property>
-                                </widget>
-                            </item>
-                            <item row="9" column="1">
-                                <widget class="QLineEdit" name="lineEditLastName">
-                                    <property name="styleSheet">
-                                        <string notr="true">border-top: 1px white;
+        </property>
+        <property name="maxLength">
+         <number>20</number>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="1">
+       <widget class="QLabel" name="labelNameError">
+        <property name="styleSheet">
+         <string notr="true">color: red;</string>
+        </property>
+        <property name="text">
+         <string>*</string>
+        </property>
+       </widget>
+      </item>
+      <item row="9" column="0">
+       <widget class="QLabel" name="label_3">
+        <property name="text">
+         <string>Apellido</string>
+        </property>
+       </widget>
+      </item>
+      <item row="9" column="1">
+       <widget class="QLineEdit" name="lineEditLastName">
+        <property name="styleSheet">
+         <string notr="true">border-top: 1px white;
                                             border-left: 1px white;
                                             border-right: 1px white;
                                         </string>
-                                    </property>
-                                    <property name="maxLength">
-                                        <number>40</number>
-                                    </property>
-                                </widget>
-                            </item>
-                            <item row="10" column="1">
-                                <widget class="QLabel" name="labelLastNameError">
-                                    <property name="styleSheet">
-                                        <string notr="true">color: red;</string>
-                                    </property>
-                                    <property name="text">
-                                        <string>*</string>
-                                    </property>
-                                </widget>
-                            </item>
-                            <item row="12" column="1">
-                                <widget class="QPushButton" name="pushButtonAccountCreate">
-                                    <property name="text">
-                                        <string>Create</string>
-                                    </property>
-                                </widget>
-                            </item>
-                            <item row="13" column="1">
-                                <widget class="QLabel" name="labelAccountCreate">
-                                    <property name="enabled">
-                                        <bool>true</bool>
-                                    </property>
-                                    <property name="styleSheet">
-                                        <string notr="true">color: green;</string>
-                                    </property>
-                                    <property name="text">
-                                        <string>Succefull !!</string>
-                                    </property>
-                                </widget>
-                            </item>
-                            <item row="14" column="1">
-                                <widget class="QLabel" name="labelAccountCreateError">
-                                    <property name="enabled">
-                                        <bool>true</bool>
-                                    </property>
-                                    <property name="styleSheet">
-                                        <string notr="true">color: red;</string>
-                                    </property>
-                                    <property name="text">
-                                        <string>Not Create !!</string>
-                                    </property>
-                                </widget>
-                            </item>
-                            <item row="11" column="1">
-                                <spacer name="verticalSpacer">
-                                    <property name="orientation">
-                                        <enum>Qt::Vertical</enum>
-                                    </property>
-                                    <property name="sizeHint" stdset="0">
-                                        <size>
-                                            <width>20</width>
-                                            <height>40</height>
-                                        </size>
-                                    </property>
-                                </spacer>
-                            </item>
-                        </layout>
-                    </item>
-                </layout>
-            </widget>
-        </widget>
-        <widget class="QMenuBar" name="menubar">
-            <property name="geometry">
-                <rect>
-                    <x>0</x>
-                    <y>0</y>
-                    <width>329</width>
-                    <height>21</height>
-                </rect>
-            </property>
-        </widget>
-        <widget class="QStatusBar" name="statusbar"/>
-    </widget>
-    <resources/>
-    <connections/>
+        </property>
+        <property name="maxLength">
+         <number>40</number>
+        </property>
+       </widget>
+      </item>
+      <item row="10" column="1">
+       <widget class="QLabel" name="labelLastNameError">
+        <property name="styleSheet">
+         <string notr="true">color: red;</string>
+        </property>
+        <property name="text">
+         <string>*</string>
+        </property>
+       </widget>
+      </item>
+      <item row="12" column="1">
+       <widget class="QPushButton" name="pushButtonAccountCreate">
+        <property name="text">
+         <string>Create</string>
+        </property>
+       </widget>
+      </item>
+      <item row="13" column="1">
+       <widget class="QLabel" name="labelAccountCreate">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">color: green;</string>
+        </property>
+        <property name="text">
+         <string>Succefull !!</string>
+        </property>
+       </widget>
+      </item>
+      <item row="14" column="1">
+       <widget class="QLabel" name="labelAccountCreateError">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">color: red;</string>
+        </property>
+        <property name="text">
+         <string>Not Create !!</string>
+        </property>
+       </widget>
+      </item>
+      <item row="11" column="1">
+       <spacer name="verticalSpacer">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>40</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
 </ui>

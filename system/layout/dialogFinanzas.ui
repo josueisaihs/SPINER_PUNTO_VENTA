@@ -280,7 +280,7 @@
                     </column>
                     <column>
                         <property name="text">
-                            <string>Costo Kardex</string>
+                            <string>Costo Compra</string>
                         </property>
                     </column>
                     <column>
