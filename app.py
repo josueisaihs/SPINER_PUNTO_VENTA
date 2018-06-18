@@ -74,6 +74,8 @@ try:
                 return self.db0.lastrowid != 0
 
             def classifyQuery(self, SELECT="", QUERY=""):
+                print("SELECT {} FROM Classify, Components WHERE Classify.id_component == Components.id {};".
+                                 format(SELECT, QUERY))
                 self.db0.execute("SELECT {} FROM Classify, Components WHERE Classify.id_component == Components.id {};".
                                  format(SELECT, QUERY))
                 return self.db0.fetchall()
@@ -1535,7 +1537,22 @@ try:
             def isAdmin(self):
                 return self.status == "Administrador"
         # <> fin User
-        
+
+        class Inventario(SQL):
+            def __init__(self):
+                super(Inventario, self).__init__()
+                SQL.__init__(self)
+
+                header = ["Ubicación", "Categoría", "Proveedor", "Código", "Modelo", "Cant Alm", "Costo", "Inversion"]
+                lista = self.classifyQuery(SELECT="Classify.location, Components.component, Classify.supplier, "
+                                                  "Classify.codeCom, Classify.codeFab, Classify.cantAlm, Classify.costProd,"
+                                                  "round(Classify.cantAlm * Classify.costProd, 2)",
+                                           QUERY=" AND Classify.cantAlm > 0")
+                dialogList = DialogList(header, lista, opcion="Inventario")
+                dialogList.setWindowTitle("Inventario")
+                if len(lista) > 0:
+                    dialogList.exec_()
+        # <> fin Inventario
 
         class ElijoSoftSecureLayout(QDialog, dialogLicUi):
             def __init__(self):
@@ -2708,18 +2725,19 @@ try:
         # <> fin DialogClientLayout
 
 
-        class DialogList(QDialog, dialogListUi):
-            def __init__(self, header, list, print=True):
+        class DialogList(QDialog, dialogListUi, SQL):
+            def __init__(self, header, list, print=True, opcion=""):
                 super(DialogList, self).__init__()
                 self.setupUi(self)
+                SQL.__init__(self)
 
-                self.tablaTreeWidget.setHeaderLabels(header)
-                for i in list:
-                    elem = []
-                    for k in i:
-                        elem.append(str(k))
-                    item = QTreeWidgetItem(elem)
-                    self.tablaTreeWidget.addTopLevelItem(item)
+                self.setWindowIcon(QIcon(os.path.join("system", "image", "icono.png")))
+
+                self.opcion = opcion
+                self.opcionInventario = "Inventario"
+
+                self.header = header
+                self.loadTabla(header, list)
 
                 if print:
                     self.printPushButton.hide()
@@ -2728,6 +2746,35 @@ try:
                 self.actionPrint = "print"
                 self.cancelPushButton.clicked.connect(self.cancel)
                 self.printPushButton.clicked.connect(self.print)
+                self.searchLineEdit.textChanged.connect(self.buscar)
+
+            def loadTabla(self, header, list):
+                self.tablaTreeWidget.clear()
+                self.tablaTreeWidget.setHeaderLabels(header)
+                for i in list:
+                    elem = []
+                    for k in i:
+                        elem.append(str(k))
+                    item = QTreeWidgetItem(elem)
+                    self.tablaTreeWidget.addTopLevelItem(item)
+
+            def buscar(self, txt):
+                if self.opcion == self.opcionInventario:
+                    text = re.compile(r"\w+")
+                    txt = text.findall(txt)
+                    
+                    if len(txt) > 0:
+                        txt = txt[0].lower()
+                        query = ""
+                        for i in ["Components.component", "Classify.codeCom", "Classify.codeFab"]:
+                            query += " OR lower({}) GLOB '*{}*'".format(i, txt)
+                        query = query[4:]
+                        lista = self.classifyQuery(SELECT="Classify.location, Components.component, Classify.supplier, "
+                                                          "Classify.codeCom, Classify.codeFab, Classify.cantAlm, Classify.costProd,"
+                                                          "round(Classify.cantAlm * Classify.costProd, 2)",
+                                                   QUERY=" AND Classify.cantAlm > 0 AND ({}) GROUP BY Classify.id".format(query))
+    
+                        self.loadTabla(self.header, lista)
 
             def cancel(self):
                 self.reject()
@@ -3085,9 +3132,11 @@ try:
                      "win": SalesLayout(), "status": "trabajador"},
                     {"image": "ada&spiner_logo_reorden.png", "action": "Reordenar", "detalle": "Para reordenar los productos",
                      "win": "", "status": "administrador"},
+                    {"image": "ada&spiner_logo_inventario.png", "action": "Inventario", "detalle": "Relacion de todos los productos",
+                     "win": "Inventario", "status": "administrador"},
                     {"image": "ada&spiner_logo_finz.png", "action": "Finanzas", "detalle": "Para el análisis de las finazas",
                      "win": DialogFinanzasLayout(), "status": "administrador"},
-                    {"image": "ada&spiner_logo_new_user.png", "action": "Clientes", "detalle": "Para consultar y editar usuarios",
+                    {"image": "ada&spiner_logo_new_client.png", "action": "Clientes", "detalle": "Para consultar y editar usuarios",
                      "win": DialogClientLayout(), "status": "administrador"},
                     {"image": "ada&spiner_logo_new_prod.png", "action": "Productos", "detalle": "Para agregar nuevos productos",
                      "win": ProductLayout(), "status": "administrador"},
@@ -3239,7 +3288,10 @@ try:
                             i["win"].exec_()
                             self.loadListWidgetPickerDeuda()
                         except:
-                            QMessageBox.information(self, "Información", "Esta opción no se encuentra disponible por ahora :(")
+                            if i["win"] == "Inventario":
+                                inventario = Inventario()
+                            else:
+                                QMessageBox.information(self, "Información", "Esta opción no se encuentra disponible por ahora :(")
 
             def listWidgetPickerDeudaDoubleClicked(self, item):
                 text = item.text().split("\n")
@@ -3303,23 +3355,23 @@ try:
                         dialogKardex.setStyleSheet(style)
                         if dialogKardex.exec_():
                             if dialogKardex.doubleValue() > 0:
-                                # try:
-                                invoiceKardex = InvoiceKardex()
-                                invoiceKardex.set_User(self.user.user)
-                                invoiceKardex.set_invoice(self.sequenceQuery("seq", "AND name == 'Invoices'")[0] + 1)
-                                invoiceKardex.kardex = float(dialogKardex.doubleValue())
-                                invoiceKardex.set_Id(self.producto.get_Id())
-                                invoiceKardex.set_costProd(self.producto.get_costProd())
+                                try:
+                                    invoiceKardex = InvoiceKardex()
+                                    invoiceKardex.set_User(self.user.user)
+                                    invoiceKardex.set_invoice(self.sequenceQuery("seq", "AND name == 'Invoices'")[0] + 1)
+                                    invoiceKardex.kardex = float(dialogKardex.doubleValue())
+                                    invoiceKardex.set_Id(self.producto.get_Id())
+                                    invoiceKardex.set_costProd(self.producto.get_costProd())
 
-                                self.invoiceKardexInsert(invoiceKardex)
+                                    self.invoiceKardexInsert(invoiceKardex)
 
-                                self.producto.add_cantAlm(dialogKardex.doubleValue())
-                                self.classifyUpdate([self.producto])
-                                QMessageBox.information(self, "Información", "Compra realizado correctamente :)")
-                                # except Exception as e:
-                                #     print(e)
-                                #     QMessageBox.critical(self, "Error", "Compra no ejecutado\nReinicie el programa e "
-                                #                                         "intente la operación nuevamente :(")
+                                    self.producto.add_cantAlm(dialogKardex.doubleValue())
+                                    self.classifyUpdate([self.producto])
+                                    QMessageBox.information(self, "Información", "Compra realizado correctamente :)")
+                                except Exception as e:
+                                    print(e)
+                                    QMessageBox.critical(self, "Error", "Compra no ejecutado\nReinicie el programa e "
+                                                                        "intente la operación nuevamente :(")
                             else:
                                 QMessageBox.warning(self, "Atención", "No se agregó ningún producto :(")
 
