@@ -55,8 +55,9 @@ try:
                 self.commit()
                 return self.db0.lastrowid != 0
 
-            def factoryQuery(self, SELECT="factory", QUERY=""):
-                self.db0.execute("SELECT {} FROM Factorys WHERE id != 0 {}".format(SELECT, QUERY))
+            def factoryQuery(self, SELECT="DISTINCT supplier", QUERY=""):
+                # self.db0.execute("SELECT {} FROM Factorys WHERE id != 0 {}".format(SELECT, QUERY))
+                self.db0.execute("SELECT {} FROM Classify WHERE id != 0 {}".format(SELECT, QUERY))
                 return self.db0.fetchall()
 
             def factoryInsert(self, text):
@@ -73,9 +74,58 @@ try:
                 self.commit()
                 return self.db0.lastrowid != 0
 
+            def componentUpdate(self, textNew, textOld):
+                self.db0.execute("UPDATE Components SET component = '{}' WHERE component == '{}'".
+                                 format(textNew, textOld))
+                self.commit()
+
+            def componentDelete(self, text):
+                self.db0.execute("SELECT id FROM Components WHERE component == '{}'".format(text))
+                id_component = self.db0.fetchone()[0]
+                id_classify = ""
+                for i in self.db0.execute("SELECT id FROM Classify WHERE id_component == {}".format(id_component)):
+                    id_classify += " OR id_classify == {}".format(i[0])
+                id_classify = id_classify[4:]
+                posible = self.classifyDelete(id_classify)
+                if posible:
+                    if id_classify != "":
+                        self.db0.execute("DELETE FROM Classify WHERE {}".format(id_classify))
+                        self.commit()
+                    self.db0.execute("DELETE FROM Components WHERE component == '{}'".format(text))
+                    self.commit()
+                return posible
+
+            def supplierDelete(self, text):
+                id_classify = ""
+                for i in self.db0.execute("SELECT id FROM Classify WHERE supplier == '{}'".format(text)):
+                    id_classify += " OR id_classify == {}".format(i[0])
+                id_classify = id_classify[4:]
+                posible = self.classifyDelete(id_classify)
+                if posible:
+                    if id_classify != "":
+                        id_classify = id_classify.replace("id_classify", "id")
+                        self.db0.execute("DELETE FROM Classify WHERE {}".format(id_classify))
+                        self.commit()
+                return posible
+
+            def classifyDelete(self, id_classify):
+                posible = True
+
+                if id_classify != "":
+                    for i in self.db0.execute("SELECT * FROM ClassifySales WHERE {}".format(id_classify)):
+                        posible = False
+                        break
+
+                    for i in self.db0.execute("SELECT * FROM ClassifyKardex WHERE {}".format(id_classify)):
+                        posible = False
+                        break
+
+                    for i in self.db0.execute("SELECT * FROM ClassifyMake WHERE {}".format(id_classify)):
+                        posible = False
+                        break
+                return posible
+
             def classifyQuery(self, SELECT="", QUERY=""):
-                print("SELECT {} FROM Classify, Components WHERE Classify.id_component == Components.id {};".
-                                 format(SELECT, QUERY))
                 self.db0.execute("SELECT {} FROM Classify, Components WHERE Classify.id_component == Components.id {};".
                                  format(SELECT, QUERY))
                 return self.db0.fetchall()
@@ -107,6 +157,10 @@ try:
                                         p4=product[0].get_price4(), cA=product[0].get_cantAlm(), cP=product[0].get_costProd(),
                                         l=product[0].get_location(), cM=product[0].get_cantMin(), t=product[0].get_tax(),
                                         f=product[0].get_flete(), i=product[0].get_codCom(), d=product[0].get_detail()))
+                self.commit()
+
+            def supplierUpdate(self, textNew, textOld):
+                self.db0.execute("UPDATE Classify SET supplier = '{}' WHERE supplier == '{}'".format(textNew, textOld))
                 self.commit()
 
             def makeQuery(self, SELECT="Ma.make, Mo.model, Cm.year, Mo.engine", QUERY=""):
@@ -1514,8 +1568,8 @@ try:
             def updateMoney(self, val):
                 self.money += val
         # <> fin DebtDetalle
-        
-        
+
+
         class User:
             id = 0
             user = ""
@@ -1633,6 +1687,8 @@ try:
                 self.crearPushButton.clicked.connect(self.crear)
                 self.imagenAddPushButton.clicked.connect(self.imagenAdd)
                 self.formatoPushButton.clicked.connect(self.formato)
+                self.categoriasPushButton.clicked.connect(self.categoriaEdit)
+                self.proveedoresPushButton.clicked.connect(self.proveedorEdit)
 
             def loadCategoria(self):
                 self.categoriaComboBox.clear()
@@ -1661,13 +1717,14 @@ try:
                 dialog.setLabelText("Insertar Nuevo Proveedor")
                 dialog.setStyleSheet(style)
                 if dialog.exec_():
-                    if self.factoryInsert(dialog.textValue()):
+                    if len(self.factoryQuery(QUERY=" AND lower(supplier) == lower('{}')".format(dialog.textValue()))) == 0:
                         QMessageBox.information(self, "Atención",
                                                 "<font color='green'>Nuevo Proveedor agregado correctamente !</font>")
-                        self.loadProveedor()
+                        # self.loadProveedor()
+                        self.proveedorComboBox.addItems(("{}".format(dialog.textValue()),))
                     else:
                         QMessageBox.critical(self, "Error",
-                                                "<font color='red'>Nuevo Proveedor ya existe !</font>")
+                                                "<font color='red'>Este Proveedor ya existe !</font>")
 
             def categoriaAdd(self):
                 dialog = QInputDialog()
@@ -1681,7 +1738,23 @@ try:
                         self.loadCategoria()
                     else:
                         QMessageBox.critical(self, "Error",
-                                             "<font color='red'>Nueva Categoría ya existe !</font>")
+                                             "<font color='red'>Esta Categoría ya existe !</font>")
+
+            def categoriaEdit(self):
+                header = ("Categoría",)
+                lista = self.componetsQuery()
+                dialogList = DialogList(header, lista, opcion="Categoria")
+                dialogList.setWindowTitle("Editar Categorías")
+                if len(lista) > 0:
+                    dialogList.exec_()
+
+            def proveedorEdit(self):
+                header = ("Proveedor",)
+                lista = self.classifyQuery(SELECT="DISTINCT Classify.supplier")
+                dialogList = DialogList(header, lista, opcion="Proveedor")
+                dialogList.setWindowTitle("Editar Proveedores")
+                if len(lista) > 0:
+                    dialogList.exec_()
 
             def categoriaChanged(self, i):
                 self.categoriaComboBox.itemText(i)
@@ -1966,10 +2039,14 @@ try:
                 self.actionAdd = "Add"
                 self.actionDetalle = "Detalle"
                 self.actionKardex = "Compra"
+                self.actionEditar = "Editar"
+                self.actionEliminar = "Eliminar"
 
                 self.addPushButton.hide()
                 self.verDetallePushButton.hide()
                 self.kardexPushButton.hide()
+                self.editarPushButton.hide()
+                self.eliminarPushButton.hide()
 
                 for i in permission:
                     if i == self.actionAdd:
@@ -1981,12 +2058,20 @@ try:
                     if i == self.actionKardex:
                         self.kardexPushButton.show()
 
+                    if i == self.actionEditar:
+                        self.editarPushButton.show()
+
+                    if i == self.actionEliminar:
+                        self.eliminarPushButton.show()
+
                 self.conection()
 
             def conection(self):
                 self.verDetallePushButton.clicked.connect(self.verDetalle)
                 self.addPushButton.clicked.connect(self.add)
                 self.kardexPushButton.clicked.connect(self.kardex)
+                self.editarPushButton.clicked.connect(self.editar)
+                self.eliminarPushButton.clicked.connect(self.eliminar)
 
             def add(self):
                 self.action = self.actionAdd
@@ -1998,6 +2083,14 @@ try:
 
             def kardex(self):
                 self.action = self.actionKardex
+                self.accept()
+
+            def editar(self):
+                self.action = self.actionEditar
+                self.accept()
+
+            def eliminar(self):
+                self.action = self.actionEliminar
                 self.accept()
         # <> fin DialogOpcionLayout
 
@@ -2735,6 +2828,8 @@ try:
 
                 self.opcion = opcion
                 self.opcionInventario = "Inventario"
+                self.opcionCategoria = "Categoria"
+                self.opcionProveedor = "Proveedor"
 
                 self.header = header
                 self.loadTabla(header, list)
@@ -2744,9 +2839,15 @@ try:
 
                 self.action = ""
                 self.actionPrint = "print"
+
+                self.connection()
+
+            def connection(self):
                 self.cancelPushButton.clicked.connect(self.cancel)
                 self.printPushButton.clicked.connect(self.print)
                 self.searchLineEdit.textChanged.connect(self.buscar)
+                if self.opcion == self.opcionCategoria or self.opcion == self.opcionProveedor:
+                    self.tablaTreeWidget.itemDoubleClicked.connect(self.opciones)
 
             def loadTabla(self, header, list):
                 self.tablaTreeWidget.clear()
@@ -2759,10 +2860,9 @@ try:
                     self.tablaTreeWidget.addTopLevelItem(item)
 
             def buscar(self, txt):
+                text = re.compile(r"\w+")
+                txt = text.findall(txt)
                 if self.opcion == self.opcionInventario:
-                    text = re.compile(r"\w+")
-                    txt = text.findall(txt)
-                    
                     if len(txt) > 0:
                         txt = txt[0].lower()
                         query = ""
@@ -2770,11 +2870,89 @@ try:
                             query += " OR lower({}) GLOB '*{}*'".format(i, txt)
                         query = query[4:]
                         lista = self.classifyQuery(SELECT="Classify.location, Components.component, Classify.supplier, "
-                                                          "Classify.codeCom, Classify.codeFab, Classify.cantAlm, Classify.costProd,"
+                                                          "Classify.codeCom, Classify.codeFab, Classify.cantAlm, "
+                                                          "Classify.costProd, "
                                                           "round(Classify.cantAlm * Classify.costProd, 2)",
-                                                   QUERY=" AND Classify.cantAlm > 0 AND ({}) GROUP BY Classify.id".format(query))
-    
-                        self.loadTabla(self.header, lista)
+                                                   QUERY=" AND Classify.cantAlm > 0 AND ({}) GROUP BY Classify.id".
+                                                   format(query))
+                    else:
+                        query = ""
+                        for i in ["Components.component", "Classify.codeCom", "Classify.codeFab"]:
+                            query += " OR lower({}) GLOB '*'"
+                        query = query[4:]
+                        lista = self.classifyQuery(SELECT="Classify.location, Components.component, Classify.supplier, "
+                                                          "Classify.codeCom, Classify.codeFab, Classify.cantAlm, "
+                                                          "Classify.costProd, "
+                                                          "round(Classify.cantAlm * Classify.costProd, 2)",
+                                                   QUERY=" AND Classify.cantAlm > 0 AND ({}) GROUP BY Classify.id".
+                                                   format(query))
+                    self.loadTabla(self.header, lista)
+                elif self.opcion == self.opcionCategoria:
+                    if len(txt) > 0:
+                        txt = txt[0].lower()
+                        lista = self.componetsQuery(QUERY=" AND lower(component) GLOB '*{}*'".format(txt))
+                    else:
+                        lista = self.componetsQuery(QUERY=" AND lower(component) GLOB '*'")
+                    self.loadTabla(self.header, lista)
+                elif self.opcion == self.opcionProveedor:
+                    if len(txt) > 0:
+                        txt = txt[0].lower()
+                        lista = self.classifyQuery(SELECT="DISTINCT Classify.supplier",
+                                                   QUERY=" AND lower(Classify.supplier) GLOB '*{}*' ".format(txt))
+                    else:
+                        lista = self.classifyQuery(SELECT="DISTINCT Classify.supplier",
+                                                   QUERY=" AND lower(Classify.supplier) GLOB '*' ")
+                    self.loadTabla(self.header, lista)
+
+            def opciones(self, item):
+                objecto = item.text(0)
+
+                dialog = DialogOpcionLayout(("Editar", "Eliminar"))
+                if dialog.exec_():
+                    if dialog.action == dialog.actionEditar:
+                        editar = QInputDialog()
+                        editar.setWindowTitle("Editar")
+                        editar.setWindowIcon(QIcon(os.path.join("system", "image", "icono.png")))
+                        editar.setLabelText("")
+                        editar.setStyleSheet(style)
+                        if editar.exec_():
+                            __editar__ = editar.textValue()
+                            if self.opcion == self.opcionCategoria:
+                                self.componentUpdate(__editar__, objecto)
+                                QMessageBox.information(self, "Informacion", "Categoría editada correctamente :)")
+                            elif self.opcion == self.opcionProveedor:
+                                self.supplierUpdate(__editar__, objecto)
+                                QMessageBox.information(self, "Informacion", "Proveedor editado correctamente :)")
+                            self.buscar("")
+                    elif dialog.action == dialog.actionEliminar:
+                        opcion = {
+                            "Proveedor": ("al Proveedor", "este Proveedor"),
+                            "Categoria": ("la Categoría", "esta Categoría"),
+                        }
+                        reply = QMessageBox.question(self, 'Confirmación Eliminación',
+                                                     "¿Estás seguro que desea eliminar {} {}?\n"
+                                                     "Esta operación eliminará los productos asociados a {} "
+                                                     "y a su vez a todas las operaciones asociadas a esos productos".
+                                                     format(opcion[self.opcion][0], objecto, opcion[self.opcion][1]),
+                                                     QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+                        if reply == QMessageBox.Yes:
+                            if self.opcion == self.opcionCategoria:
+                                if self.componentDelete(objecto):
+                                    QMessageBox.information(self, "Aviso", "Categoría eliminada correctamente :)")
+                                else:
+                                    QMessageBox.critical(self, "Error", "No es posible eliminar esta categoría; "
+                                                                        "porque tiene operaciones relacionadas, "
+                                                                        "lo cual afecta directamente la contabilidad "
+                                                                        "del sistema")
+                            elif self.opcion == self.opcionProveedor:
+                                if self.supplierDelete(objecto):
+                                    QMessageBox.information(self, "Aviso", "Proveedor eliminado correctamente :)")
+                                else:
+                                    QMessageBox.critical(self, "Error", "No es posible eliminar esta categoría; "
+                                                                        "porque tiene operaciones relacionadas, "
+                                                                        "lo cual afecta directamente la contabilidad "
+                                                                        "del sistema")
+                            self.buscar("")
 
             def cancel(self):
                 self.reject()
@@ -3589,11 +3767,11 @@ try:
                     user, permission, name, lastname = self.loginUser(self.lineEditUser.text(), self.lineEditPwd.text())
                     if user:
                         self.hide()
-                        
+
                         user_ = User()
                         user_.user = user
                         user_.status = permission
-                        
+
                         admin = InicioLayout(user_)
                         admin.setWindowIcon(QIcon(os.path.join("system", "image", "icono.png")))
                         admin.exec_()
@@ -3677,6 +3855,7 @@ try:
                     widget.addTopLevelItem(item)
                 widget.sortItems(0, order)
         # <> fin DialogFinanzasLayout
+
 
         class Account(QDialog, dialogAccountUi, SQL):
             def __init__(self):
