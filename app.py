@@ -14,9 +14,9 @@ try:
         from PyQt5 import uic
         from PyQt5.Qt import Qt
         from PyQt5.QtCore import QSize, QTimer
-        from PyQt5.QtGui import QIcon
+        from PyQt5.QtGui import QIcon, QContextMenuEvent
         from PyQt5.QtWidgets import QApplication, QMessageBox, QInputDialog, QListWidgetItem, QDialog, \
-            QFileDialog, QTreeWidgetItem
+            QFileDialog, QTreeWidgetItem, QAction, QMenu
         import sqlite3 as sql
         from shutil import copyfile as cf
         import imghdr
@@ -445,6 +445,14 @@ try:
                                  format(id_invoice=id_invoice, id_client=id_client, money=debt.money))
                 self.commit()
 
+            def workerInsert(self, worker):
+                self.db0.execute("INSERT OR IGNORE INTO Workers(name, lastname, ci, street, city, state, phone, "
+                                 "phoneOther, mobil, mobilOther, email) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                                 worker.getSQL())
+                self.commit()
+
+                return self.db0.lastrowid
+
             def eventInsert(self, event):
                 self.db0.execute("INSERT INTO Events(id_user, event, operation) VALUES (?, ?, ?)", event)
 
@@ -835,6 +843,7 @@ try:
 
             dialogListUi = uic.loadUiType(os.path.join("system", "layout", "dialogList.ui"))[0]
             dialogAccountUi = uic.loadUiType(os.path.join("system", "layout", "account.ui"))[0]
+            dialogNewWorker = uic.loadUiType(os.path.join("system", "layout", "dialogWorker.ui"))[0]
         except:
             logging.error("Problemas cargando archivos %s", 'EXCFILE001')
 
@@ -1607,6 +1616,25 @@ try:
                 if len(lista) > 0:
                     dialogList.exec_()
         # <> fin Inventario
+
+        class Worker:
+            id = 0
+            name = ""
+            lastname = ""
+            ci = ""
+            street = ""
+            city = ""
+            state = ""
+            phone = ""
+            phoneOther = ""
+            mobil = ""
+            mobilOther = ""
+            email = ""
+
+            def getSQL(self):
+                return self.name, self.lastname, self.ci, self.street, self.city, self.state, self.phone, \
+                       self.phoneOther, self.mobil, self.mobilOther, self.email
+        # <> fin Worker
 
         class ElijoSoftSecureLayout(QDialog, dialogLicUi):
             def __init__(self):
@@ -3276,6 +3304,77 @@ try:
         # <> fin DialogNewClientLayout
 
 
+        class DialogNewWorkerLayout(QDialog, dialogNewWorker, SQL):
+            def __init__(self):
+                super(DialogNewWorkerLayout, self).__init__()
+                QDialog.__init__(self)
+                SQL.__init__(self)
+                self.setupUi(self)
+
+                self.setWindowIcon(QIcon(os.path.join("system", "image", "icono.png")))
+
+                self.okPushButton.hide()
+
+                self.connection()
+
+            def connection(self):
+                self.nombreLineEdit.textChanged.connect(self.nombreTextChanged)
+                self.apellidosLineEdit.textChanged.connect(self.apellidosTextChanged)
+                self.cILineEdit.textChanged.connect(self.cITextChanged)
+                self.okPushButton.clicked.connect(self.ok)
+                self.cancelarPushButton.clicked.connect(self.reject)
+
+            def nombreTextChanged(self, txt):
+                self.nombreLineEdit.setText(self.filtroName(txt))
+                self.mostrarOk()
+
+            def apellidosTextChanged(self, txt):
+                self.apellidosLineEdit.setText(self.filtroName(txt))
+                self.mostrarOk()
+
+            def cITextChanged(self, txt):
+                self.mostrarOk()
+
+            def mostrarOk(self):
+                if len(self.cILineEdit.text()) == 11 and len(self.nombreLineEdit.text()) >= 3 \
+                        and len(self.apellidosLineEdit.text()) >= 3:
+                    self.okPushButton.show()
+                else:
+                    self.okPushButton.hide()
+
+            def filtroName(self, txt):
+                newTxt = ""
+                many = 0
+                for i in txt:
+                    if i.isalpha():
+                        newTxt += i
+                    if i == " " and many == 0:
+                        newTxt += i
+                        many += 1
+                return newTxt.title()
+
+            def ok(self):
+                worker = Worker()
+                worker.name = self.nombreLineEdit.text()
+                worker.lastname = self.apellidosLineEdit.text()
+                worker.ci = self.cILineEdit.text()
+                worker.street = self.calleLineEdit.text()
+                worker.city = self.municipioLineEdit.text()
+                worker.state = self.provinciaLineEdit.text()
+                worker.phone = self.casaLineEdit.text()
+                worker.phoneOther = self.otroCasaLineEdit.text()
+                worker.mobil = self.movilLineEdit.text()
+                worker.mobilOther = self.otroMovilLineEdit.text()
+                worker.email = self.emailLineEdit.text()
+
+                if self.workerInsert(worker) != 0:
+                    QMessageBox.information(self, "Aviso", "Trabajador insertado correctamente")
+                    self.accept()
+                else:
+                    QMessageBox.critical(self, "Error", "No se pudo insertar el trabajador")
+        # <> fin DialogNewWorker
+
+
         class InicioLayout(QDialog, inicioUi, SQL):
             def __init__(self, user):
                 super(InicioLayout, self).__init__()
@@ -3308,8 +3407,8 @@ try:
                 self.action = (
                     {"image": "ada&spiner_logo_caj.png", "action": "Caja", "detalle": "Para la venta de productos",
                      "win": SalesLayout(), "status": "trabajador"},
-                    {"image": "ada&spiner_logo_reorden.png", "action": "Reordenar", "detalle": "Para reordenar los productos",
-                     "win": "", "status": "administrador"},
+                    # {"image": "ada&spiner_logo_reorden.png", "action": "Reordenar", "detalle": "Para reordenar los productos",
+                    #  "win": "", "status": "administrador"},
                     {"image": "ada&spiner_logo_inventario.png", "action": "Inventario", "detalle": "Relacion de todos los productos",
                      "win": "Inventario", "status": "administrador"},
                     {"image": "ada&spiner_logo_finz.png", "action": "Finanzas", "detalle": "Para el análisis de las finazas",
@@ -3322,6 +3421,8 @@ try:
                      "win": SearcherLayout(), "status": "administrador"},
                     {"image": "ada&spiner_logo_new_user.png", "action": "Perfiles", "detalle": "Para crear usuarios y permisos",
                      "win": Account(), "status": "administrador"},
+                    {"image": "ada&spiner_logo_worker.png", "action": "Trabajadores", "detalle": "Para el control de los trabajadores",
+                     "win": DialogNewWorkerLayout(), "status": "administrador"},
                     )
                 for i in self.action:
                     if i["status"] == self.user.status.lower() or i["action"] == "Caja":
@@ -3334,7 +3435,7 @@ try:
                 if self.user.isAdmin():
                     for i in self.classifyQuery(SELECT="Classify.codeFab, Classify.codeCom, Classify.cantAlm",
                                                 QUERY="AND Classify.cantAlm <= Classify.cantMin "
-                                                      "ORDER BY Classify.cantVisit DESC LIMIT 7"):
+                                                      "ORDER BY Classify.cantVisit DESC"):
                         item = QListWidgetItem()
                         item.setIcon(QIcon(os.path.join("system", "image", "comprar_info.png")))
                         item.setText("Codigo: {}\nModelo: {}\n".format(i[0], i[1]))
