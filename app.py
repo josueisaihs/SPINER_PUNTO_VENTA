@@ -2906,7 +2906,7 @@ try:
                     else:
                         query = ""
                         for i in ["Components.component", "Classify.codeCom", "Classify.codeFab"]:
-                            query += " OR lower({}) GLOB '*'"
+                            query += " OR lower({}) GLOB '*'".format(i)
                         query = query[4:]
                         lista = self.classifyQuery(SELECT="Classify.location, Components.component, Classify.supplier, "
                                                           "Classify.codeCom, Classify.codeFab, Classify.cantAlm, "
