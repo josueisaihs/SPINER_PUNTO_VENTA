@@ -453,6 +453,22 @@ try:
 
                 return self.db0.lastrowid
 
+            def workerUpdate(self, worker, workerOld):
+                self.db0.execute("UPDATE Workers SET name = '{name}', lastname = '{lastname}', ci = '{ci}', "
+                                 "street = '{street}', city = '{city}', state = '{state}', phone = '{phone}', "
+                                 "phoneOther = '{phoneOther}', mobil = '{mobil}', mobilOther = '{mobilOther}', "
+                                 "email = '{email}' WHERE name == '{nameOld}' AND lastname == '{lastnameOld}'".format(
+                    name=worker.name, lastname=worker.lastname, ci=worker.ci, street=worker.street, city=worker.city,
+                    state=worker.state, phone=worker.phone, phoneOther=worker.phoneOther, mobil=worker.mobil,
+                    mobilOther=worker.mobilOther, email=worker.email,
+                    nameOld=workerOld.name, lastnameOld=workerOld.lastname
+                ))
+                self.commit()
+
+            def workerQuery(self, SELECT="name, lastname, ci, street, city, state, phone", QUERY=""):
+                self.db0.execute("SELECT {} FROM Workers WHERE id != 0 {}".format(SELECT, QUERY))
+                return self.db0.fetchall()
+
             def eventInsert(self, event):
                 self.db0.execute("INSERT INTO Events(id_user, event, operation) VALUES (?, ?, ?)", event)
 
@@ -2855,15 +2871,24 @@ try:
                 self.setWindowIcon(QIcon(os.path.join("system", "image", "icono.png")))
 
                 self.opcion = opcion
+                self.opcionClient = "Client"
                 self.opcionInventario = "Inventario"
                 self.opcionCategoria = "Categoria"
                 self.opcionProveedor = "Proveedor"
+                self.opcionTrabajadores = "Trabajadores"
 
                 self.header = header
                 self.loadTabla(header, list)
 
-                if print:
-                    self.printPushButton.hide()
+                self.cancelPushButton.hide()
+                self.addPushButton.hide()
+                self.printPushButton.hide()
+
+                if self.opcion == self.opcionClient:
+                    self.printPushButton.show()
+
+                if self.opcion == self.opcionTrabajadores:
+                    self.addPushButton.show()
 
                 self.action = ""
                 self.actionPrint = "print"
@@ -2874,8 +2899,10 @@ try:
                 self.cancelPushButton.clicked.connect(self.cancel)
                 self.printPushButton.clicked.connect(self.print)
                 self.searchLineEdit.textChanged.connect(self.buscar)
-                if self.opcion == self.opcionCategoria or self.opcion == self.opcionProveedor:
+                if self.opcion == self.opcionCategoria or self.opcion == self.opcionProveedor \
+                        or self.opcion == self.opcionTrabajadores:
                     self.tablaTreeWidget.itemDoubleClicked.connect(self.opciones)
+                self.addPushButton.clicked.connect(self.add)
 
             def loadTabla(self, header, list):
                 self.tablaTreeWidget.clear()
@@ -2931,56 +2958,121 @@ try:
                         lista = self.classifyQuery(SELECT="DISTINCT Classify.supplier",
                                                    QUERY=" AND lower(Classify.supplier) GLOB '*' ")
                     self.loadTabla(self.header, lista)
+                elif self.opcion == self.opcionTrabajadores:
+                    if len(txt) > 0:
+                        text = txt[0].lower()
+                        lista = self.workerQuery(QUERY=" AND ("
+                                                       "lower(name) GLOB '*{txt}*' OR "
+                                                       "lower(lastname) GLOB '*{txt}*' OR "
+                                                       "lower(street) GLOB '*{txt}*' OR "
+                                                       "lower(city) GLOB '*{txt}*' OR "
+                                                       "lower(state) GLOB '*{txt}*'"
+                                                       ")".format(txt=text))
+                    else:
+                        lista = self.workerQuery()
+                    self.loadTabla(self.header, lista)
 
             def opciones(self, item):
-                objecto = item.text(0)
+                if self.opcion == self.opcionProveedor or self.opcion == self.opcionCategoria:
+                    objecto = item.text(0)
 
-                dialog = DialogOpcionLayout(("Editar", "Eliminar"))
-                if dialog.exec_():
-                    if dialog.action == dialog.actionEditar:
-                        editar = QInputDialog()
-                        editar.setWindowTitle("Editar")
-                        editar.setWindowIcon(QIcon(os.path.join("system", "image", "icono.png")))
-                        editar.setLabelText("")
-                        editar.setStyleSheet(style)
-                        if editar.exec_():
-                            __editar__ = editar.textValue()
-                            if self.opcion == self.opcionCategoria:
-                                self.componentUpdate(__editar__, objecto)
-                                QMessageBox.information(self, "Informacion", "Categoría editada correctamente :)")
-                            elif self.opcion == self.opcionProveedor:
-                                self.supplierUpdate(__editar__, objecto)
-                                QMessageBox.information(self, "Informacion", "Proveedor editado correctamente :)")
-                            self.buscar("")
-                    elif dialog.action == dialog.actionEliminar:
-                        opcion = {
-                            "Proveedor": ("al Proveedor", "este Proveedor"),
-                            "Categoria": ("la Categoría", "esta Categoría"),
-                        }
-                        reply = QMessageBox.question(self, 'Confirmación Eliminación',
-                                                     "¿Estás seguro que desea eliminar {} {}?\n"
-                                                     "Esta operación eliminará los productos asociados a {} "
-                                                     "y a su vez a todas las operaciones asociadas a esos productos".
-                                                     format(opcion[self.opcion][0], objecto, opcion[self.opcion][1]),
-                                                     QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-                        if reply == QMessageBox.Yes:
-                            if self.opcion == self.opcionCategoria:
-                                if self.componentDelete(objecto):
-                                    QMessageBox.information(self, "Aviso", "Categoría eliminada correctamente :)")
-                                else:
-                                    QMessageBox.critical(self, "Error", "No es posible eliminar esta categoría; "
-                                                                        "porque tiene operaciones relacionadas, "
-                                                                        "lo cual afecta directamente la contabilidad "
-                                                                        "del sistema")
-                            elif self.opcion == self.opcionProveedor:
-                                if self.supplierDelete(objecto):
-                                    QMessageBox.information(self, "Aviso", "Proveedor eliminado correctamente :)")
-                                else:
-                                    QMessageBox.critical(self, "Error", "No es posible eliminar esta categoría; "
-                                                                        "porque tiene operaciones relacionadas, "
-                                                                        "lo cual afecta directamente la contabilidad "
-                                                                        "del sistema")
-                            self.buscar("")
+                    dialog = DialogOpcionLayout(("Editar", "Eliminar"))
+                    if dialog.exec_():
+                        if dialog.action == dialog.actionEditar:
+                            editar = QInputDialog()
+                            editar.setWindowTitle("Editar")
+                            editar.setWindowIcon(QIcon(os.path.join("system", "image", "icono.png")))
+                            editar.setLabelText("")
+                            editar.setStyleSheet(style)
+                            if editar.exec_():
+                                __editar__ = editar.textValue()
+                                if self.opcion == self.opcionCategoria:
+                                    self.componentUpdate(__editar__, objecto)
+                                    QMessageBox.information(self, "Informacion", "Categoría editada correctamente :)")
+                                elif self.opcion == self.opcionProveedor:
+                                    self.supplierUpdate(__editar__, objecto)
+                                    QMessageBox.information(self, "Informacion", "Proveedor editado correctamente :)")
+                                self.buscar("")
+                        elif dialog.action == dialog.actionEliminar:
+                            opcion = {
+                                "Proveedor": ("al Proveedor", "este Proveedor"),
+                                "Categoria": ("la Categoría", "esta Categoría"),
+                            }
+                            reply = QMessageBox.question(self, 'Confirmación Eliminación',
+                                                         "¿Estás seguro que desea eliminar {} {}?\n"
+                                                         "Esta operación eliminará los productos asociados a {} "
+                                                         "y a su vez a todas las operaciones asociadas a esos productos".
+                                                         format(opcion[self.opcion][0], objecto, opcion[self.opcion][1]),
+                                                         QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+                            if reply == QMessageBox.Yes:
+                                if self.opcion == self.opcionCategoria:
+                                    if self.componentDelete(objecto):
+                                        QMessageBox.information(self, "Aviso", "Categoría eliminada correctamente :)")
+                                    else:
+                                        QMessageBox.critical(self, "Error", "No es posible eliminar esta categoría; "
+                                                                            "porque tiene operaciones relacionadas, "
+                                                                            "lo cual afecta directamente la contabilidad "
+                                                                            "del sistema")
+                                elif self.opcion == self.opcionProveedor:
+                                    if self.supplierDelete(objecto):
+                                        QMessageBox.information(self, "Aviso", "Proveedor eliminado correctamente :)")
+                                    else:
+                                        QMessageBox.critical(self, "Error", "No es posible eliminar esta categoría; "
+                                                                            "porque tiene operaciones relacionadas, "
+                                                                            "lo cual afecta directamente la contabilidad "
+                                                                            "del sistema")
+                                self.buscar("")
+                elif self.opcion == self.opcionTrabajadores:
+                    name = item.text(0)
+                    lastname = item.text(1)
+                    dialog = DialogOpcionLayout(("Detalle", "Editar"))
+                    if dialog.exec_():
+                        workerQ = self.workerQuery(
+                            SELECT="name, lastname, ci, street, city, state, phone, phoneOther, mobil, mobilOther, email",
+                            QUERY=" AND name == '{}' AND lastname == '{}'".format(name, lastname))[0]
+                        worker = DialogNewWorkerLayout()
+                        worker.nombreLineEdit.setText(workerQ[0])
+                        worker.apellidosLineEdit.setText(workerQ[1])
+                        worker.cILineEdit.setText(workerQ[2])
+                        worker.calleLineEdit.setText(workerQ[3])
+                        worker.municipioLineEdit.setText(workerQ[4])
+                        worker.provinciaLineEdit.setText(workerQ[5])
+                        worker.casaLineEdit.setText(workerQ[6])
+                        worker.otroCasaLineEdit.setText(workerQ[7])
+                        worker.movilLineEdit.setText(workerQ[8])
+                        worker.otroMovilLineEdit.setText(workerQ[9])
+                        worker.emailLineEdit.setText(workerQ[10])
+
+                        if dialog.action == dialog.actionDetalle:
+                            worker.nombreLineEdit.setReadOnly(True)
+                            worker.apellidosLineEdit.setReadOnly(True)
+                            worker.cILineEdit.setReadOnly(True)
+                            worker.calleLineEdit.setReadOnly(True)
+                            worker.municipioLineEdit.setReadOnly(True)
+                            worker.provinciaLineEdit.setReadOnly(True)
+                            worker.casaLineEdit.setReadOnly(True)
+                            worker.otroCasaLineEdit.setReadOnly(True)
+                            worker.movilLineEdit.setReadOnly(True)
+                            worker.otroMovilLineEdit.setReadOnly(True)
+                            worker.emailLineEdit.setReadOnly(True)
+
+                            worker.okPushButton.hide()
+
+                            if worker.exec_():
+                                pass
+                        elif dialog.action == dialog.actionEditar:
+                            worker.okPushButton.hide()
+                            worker.editarPushButton.show()
+                            worker.workerOld.name = name
+                            worker.workerOld.lastname = lastname
+                            if worker.exec_():
+                                self.buscar("")
+
+            def add(self):
+                if self.opcionTrabajadores == self.opcion:
+                    dialog = DialogNewWorkerLayout()
+                    if dialog.exec_():
+                        self.buscar(txt="")
 
             def cancel(self):
                 self.reject()
@@ -3305,7 +3397,7 @@ try:
 
 
         class DialogNewWorkerLayout(QDialog, dialogNewWorker, SQL):
-            def __init__(self):
+            def __init__(self, edit=False):
                 super(DialogNewWorkerLayout, self).__init__()
                 QDialog.__init__(self)
                 SQL.__init__(self)
@@ -3313,7 +3405,11 @@ try:
 
                 self.setWindowIcon(QIcon(os.path.join("system", "image", "icono.png")))
 
+                self.edit = edit
+                self.workerOld = Worker()
+
                 self.okPushButton.hide()
+                self.editarPushButton.hide()
 
                 self.connection()
 
@@ -3322,6 +3418,7 @@ try:
                 self.apellidosLineEdit.textChanged.connect(self.apellidosTextChanged)
                 self.cILineEdit.textChanged.connect(self.cITextChanged)
                 self.okPushButton.clicked.connect(self.ok)
+                self.editarPushButton.clicked.connect(self.editar)
                 self.cancelarPushButton.clicked.connect(self.reject)
 
             def nombreTextChanged(self, txt):
@@ -3338,9 +3435,15 @@ try:
             def mostrarOk(self):
                 if len(self.cILineEdit.text()) == 11 and len(self.nombreLineEdit.text()) >= 3 \
                         and len(self.apellidosLineEdit.text()) >= 3:
-                    self.okPushButton.show()
+                    if not self.edit:
+                        self.okPushButton.show()
+                    else:
+                        self.editPushButton.show()
                 else:
-                    self.okPushButton.hide()
+                    if not self.edit:
+                        self.okPushButton.hide()
+                    else:
+                        self.editPushButton.hide()
 
             def filtroName(self, txt):
                 newTxt = ""
@@ -3371,6 +3474,27 @@ try:
                     QMessageBox.information(self, "Aviso", "Trabajador insertado correctamente")
                     self.accept()
                 else:
+                    QMessageBox.critical(self, "Error", "No se pudo insertar el trabajador")
+
+            def editar(self):
+                worker = Worker()
+                worker.name = self.nombreLineEdit.text()
+                worker.lastname = self.apellidosLineEdit.text()
+                worker.ci = self.cILineEdit.text()
+                worker.street = self.calleLineEdit.text()
+                worker.city = self.municipioLineEdit.text()
+                worker.state = self.provinciaLineEdit.text()
+                worker.phone = self.casaLineEdit.text()
+                worker.phoneOther = self.otroCasaLineEdit.text()
+                worker.mobil = self.movilLineEdit.text()
+                worker.mobilOther = self.otroMovilLineEdit.text()
+                worker.email = self.emailLineEdit.text()
+
+                try:
+                    self.workerUpdate(worker, self.workerOld)
+                    QMessageBox.information(self, "Aviso", "Trabajador editado correctamente")
+                    self.accept()
+                except:
                     QMessageBox.critical(self, "Error", "No se pudo insertar el trabajador")
         # <> fin DialogNewWorker
 
@@ -3422,7 +3546,7 @@ try:
                     {"image": "ada&spiner_logo_new_user.png", "action": "Perfiles", "detalle": "Para crear usuarios y permisos",
                      "win": Account(), "status": "administrador"},
                     {"image": "ada&spiner_logo_worker.png", "action": "Trabajadores", "detalle": "Para el control de los trabajadores",
-                     "win": DialogNewWorkerLayout(), "status": "administrador"},
+                     "win": "Trabajadores", "status": "administrador"},
                     )
                 for i in self.action:
                     if i["status"] == self.user.status.lower() or i["action"] == "Caja":
@@ -3568,7 +3692,24 @@ try:
                             self.loadListWidgetPickerDeuda()
                         except:
                             if i["win"] == "Inventario":
-                                inventario = Inventario()
+                                header = ["Ubicación", "Categoría", "Proveedor", "Código", "Modelo", "Cant Alm",
+                                          "Costo", "Inversion"]
+                                lista = self.classifyQuery(
+                                    SELECT="Classify.location, Components.component, Classify.supplier, "
+                                           "Classify.codeCom, Classify.codeFab, Classify.cantAlm, Classify.costProd,"
+                                           "round(Classify.cantAlm * Classify.costProd, 2)",
+                                    QUERY=" AND Classify.cantAlm > 0")
+                                dialogList = DialogList(header, lista, opcion="Inventario")
+                                dialogList.setWindowTitle("Inventario")
+                                if len(lista) > 0:
+                                    dialogList.exec_()
+                            elif i["win"] == "Trabajadores":
+                                header = ["Nombre", "Apellidos", "CI", "Direccion", "Municipio", "Provincia", "Teléfono"]
+                                lista = self.workerQuery()
+                                dialogList = DialogList(header, lista, opcion="Trabajadores")
+                                dialogList.setWindowTitle("Trabajadores")
+                                if len(lista) > 0:
+                                    dialogList.exec_()
                             else:
                                 QMessageBox.information(self, "Información", "Esta opción no se encuentra disponible por ahora :(")
 
