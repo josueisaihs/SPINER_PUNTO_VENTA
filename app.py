@@ -469,6 +469,17 @@ try:
                 self.db0.execute("SELECT {} FROM Workers WHERE id != 0 {}".format(SELECT, QUERY))
                 return self.db0.fetchall()
 
+            def inversionInsert(self, inversion):
+                self.db0.execute("INSERT OR IGNORE INTO Invertion(name, startValue, utilLife, residualValue, "
+                                 "startDate, endDate, qty) VALUES (?, ?, ?, ?, ?, ?, ?)", inversion.getSQL())
+                self.commit()
+
+                return self.db0.lastrowid
+
+            def inversionQuery(self, SELECT="*", QUERY=""):
+                self.db0.execute("SELECT {} FROM Invertion WHERE id != 0 {}".format(SELECT, QUERY))
+                return self.db0.fetchall()
+
             def eventInsert(self, event):
                 self.db0.execute("INSERT INTO Events(id_user, event, operation) VALUES (?, ?, ?)", event)
 
@@ -860,6 +871,8 @@ try:
             dialogListUi = uic.loadUiType(os.path.join("system", "layout", "dialogList.ui"))[0]
             dialogAccountUi = uic.loadUiType(os.path.join("system", "layout", "account.ui"))[0]
             dialogNewWorker = uic.loadUiType(os.path.join("system", "layout", "dialogWorker.ui"))[0]
+            dialogActivos = uic.loadUiType(os.path.join("system", "layout", "dialogActivos.ui"))[0]
+            dialogNewInversion = uic.loadUiType(os.path.join("system", "layout", "dialogNewInversion.ui"))[0]
         except:
             logging.error("Problemas cargando archivos %s", 'EXCFILE001')
 
@@ -1651,6 +1664,48 @@ try:
                 return self.name, self.lastname, self.ci, self.street, self.city, self.state, self.phone, \
                        self.phoneOther, self.mobil, self.mobilOther, self.email
         # <> fin Worker
+
+
+        class Inversion:
+            id = 0
+            name = ""
+            startValue = 0
+            utilLife = 0
+            residualValue = 0
+            startDate = datetime.date.today()
+            endDate = datetime.date.today()
+            cant = 0
+
+            def setUtilLife(self, value):
+                self.utilLife = value
+                self.endDate = self.startDate + datetime.timedelta(days=value * 365)
+
+            def getSQL(self):
+                return self.name, self.startValue, self.utilLife, self.residualValue, self.startDate.isoformat(), \
+                       self.endDate.isoformat(), self.cant
+
+            def valorActual(self):
+                Fo = self.startValue * self.cant
+                Ta = self.utilLife
+                Ki = self.residualValue * self.cant
+                i = self.endDate - self.startDate
+                i = int(i.days / 365)
+
+                f = 1 - (Ki / Fo) ** (1 / Ta)
+                return i, round(Fo * (1 - f) ** i, 4)
+
+            def setStartDate(self, date):
+                year, month, day = date.split("-")
+                self.startDate = datetime.date(year=int(year), month=int(month), day=int(day))
+
+            def setEndDate(self, date):
+                year, month, day = date.split("-")
+                self.EndDate = datetime.date(year=int(year), month=int(month), day=int(day))
+
+            def getTreeWidget(self):
+                return self.name, str(self.startValue), str(self.utilLife), str(self.residualValue), str(
+                    self.valorActual()[0]), str(self.cant), str(self.valorActual()[1])
+        # <> fin Inversion
 
         class ElijoSoftSecureLayout(QDialog, dialogLicUi):
             def __init__(self):
@@ -3499,6 +3554,150 @@ try:
         # <> fin DialogNewWorker
 
 
+        class DialogActivosLayout(QDialog, dialogActivos, SQL):
+            def __init__(self):
+                super(DialogActivosLayout, self).__init__()
+                QDialog.__init__(self)
+                SQL.__init__(self)
+                self.setupUi(self)
+
+                self.user = User()
+
+                self.loadInversionTreeWidget()
+                self.connection()
+
+            def connection(self):
+                self.newInversionPushButton.clicked.connect(self.newInversion)
+                self.inversionTreeWidget.itemDoubleClicked.connect(self.selectInversion)
+                self.searchInversionLineEdit.textChanged.connect(self.searchInversion)
+
+            def newInversion(self):
+                dialog = DialogNewInversionLayout()
+                if dialog.exec_():
+                    self.loadInversionTreeWidget()
+
+            def searchInversion(self, txt):
+                self.loadInversionTreeWidget(txt)
+
+            def loadInversionTreeWidget(self, txt=""):
+                self.inversionTreeWidget.clear()
+                patrimonio = 0.00
+                for i in self.inversionQuery(QUERY=" AND upper(name) GLOB '*{}*'".format(txt.upper())):
+                    inversion = Inversion()
+                    inversion.name = i[1]
+                    inversion.startValue = i[2]
+                    inversion.utilLife = i[3]
+                    inversion.residualValue = i[4]
+                    inversion.setStartDate(i[5])
+                    inversion.setEndDate(i[6])
+                    inversion.cant = i[7]
+
+                    patrimonio += inversion.valorActual()[1]
+
+                    item = QTreeWidgetItem(inversion.getTreeWidget())
+                    self.inversionTreeWidget.addTopLevelItem(item)
+                self.patrimonioLabel.setText("Patrimonio: $ {}".format(patrimonio))
+
+            def selectInversion(self, item):
+                for i in self.inversionQuery(QUERY=" AND name == '{}'".format(item.text(0))):
+                    inversion = Inversion()
+                    inversion.name = i[1]
+                    inversion.startValue = i[2]
+                    inversion.utilLife = i[3]
+                    inversion.residualValue = i[4]
+                    inversion.setStartDate(i[5])
+                    inversion.setEndDate(i[6])
+                    inversion.cant = i[7]
+                    break
+
+                dialog = DialogNewInversionLayout(nuevo=False)
+                dialog.nombreLineEdit.setText(inversion.name)
+                dialog.valorInicialDoubleSpinBox.setValue(inversion.startValue)
+                dialog.vidaUtilDoubleSpinBox.setValue(inversion.utilLife)
+                dialog.valorResidualDoubleSpinBox.setValue(inversion.residualValue)
+                dialog.calendarWidget.setSelectedDate(inversion.startDate)
+                dialog.cantidadDoubleSpinBox.setValue(inversion.cant)
+                dialog.exec_()
+        # <> fin DialogActivosLayout
+
+
+        class DialogNewInversionLayout(QDialog, dialogNewInversion, SQL):
+            def __init__(self, nuevo=True):
+                super(DialogNewInversionLayout, self).__init__()
+                QDialog.__init__(self)
+                SQL.__init__(self)
+                self.setupUi(self)
+
+                self.okPushButton.hide()
+                self.nuevo = nuevo
+
+                self.calendarWidget.setMaximumDate(datetime.date.today())
+
+                self.connection()
+
+            def connection(self):
+                self.okPushButton.clicked.connect(self.ok)
+                self.cancelarPushButton.clicked.connect(self.reject)
+                self.nombreLineEdit.textChanged.connect(self.nombreTextChanged)
+                self.valorInicialDoubleSpinBox.valueChanged.connect(self.calc)
+                self.vidaUtilDoubleSpinBox.valueChanged.connect(self.calc)
+                self.valorResidualDoubleSpinBox.valueChanged.connect(self.calc)
+                self.cantidadDoubleSpinBox.valueChanged.connect(self.calc)
+
+            def ok(self):
+                fecha = self.calendarWidget.selectedDate()
+
+                inversion = Inversion()
+                inversion.name = self.nombreLineEdit.text()
+                inversion.startValue = self.valorInicialDoubleSpinBox.value()
+                inversion.startDate = datetime.date(year=fecha.year(), month=fecha.month(), day=fecha.day())
+                inversion.setUtilLife(self.vidaUtilDoubleSpinBox.value())
+                inversion.residualValue = self.valorResidualDoubleSpinBox.value()
+                inversion.cant = self.cantidadDoubleSpinBox.value()
+
+                if self.inversionInsert(inversion):
+                    QMessageBox.information(self, "Aviso", "Inversion insertada correctamente")
+                    self.accept()
+                else:
+                    QMessageBox.critical(self, "Error", "No se ha podido insertar la inversion")
+
+            def nombreTextChanged(self, txt):
+                if len(txt) > 5 and self.nuevo:
+                    self.okPushButton.show()
+                else:
+                    self.okPushButton.hide()
+
+            def calc(self):
+                cant = self.cantidadDoubleSpinBox.value()
+                Fo = cant * self.valorInicialDoubleSpinBox.value()
+                Ta = self.vidaUtilDoubleSpinBox.value()
+                Ki = cant * self.valorResidualDoubleSpinBox.value()
+
+                try:
+                    if Ki == 0:
+                        Ki = 10 ** -20
+
+                    f = 1 - (Ki / Fo) ** (1 / Ta)
+
+                    self.treeWidget.clear()
+
+                    elem = ["0", str(Fo), "0.0000"]
+                    item = QTreeWidgetItem(elem)
+                    self.treeWidget.addTopLevelItem(item)
+
+                    for k in range(int(Ta)):
+                        i = k + 1
+                        Ka = str(round(Fo * f * (1 - f) ** (i - 1), 4))
+                        Valor = str(round(Fo * (1 - f) ** i, 4))
+                        i = str(i)
+                        elem = [i, Valor, Ka]
+                        item = QTreeWidgetItem(elem)
+                        self.treeWidget.addTopLevelItem(item)
+                except ZeroDivisionError:
+                    pass
+        # <> fin DialogNewInversionLayout
+
+
         class InicioLayout(QDialog, inicioUi, SQL):
             def __init__(self, user):
                 super(InicioLayout, self).__init__()
@@ -3547,6 +3746,8 @@ try:
                      "win": Account(), "status": "administrador"},
                     {"image": "ada&spiner_logo_worker.png", "action": "Trabajadores", "detalle": "Para el control de los trabajadores",
                      "win": "Trabajadores", "status": "administrador"},
+                    {"image": "ada&spiner_logo_inversion.png", "action": "Activos", "detalle": "Para consultar y agregar activos",
+                     "win": DialogActivosLayout(), "status": "administrador"},
                     )
                 for i in self.action:
                     if i["status"] == self.user.status.lower() or i["action"] == "Caja":
