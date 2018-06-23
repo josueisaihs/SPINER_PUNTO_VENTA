@@ -476,6 +476,16 @@ try:
 
                 return self.db0.lastrowid
 
+            def inversionUpdate(self, inversion, inversionOld):
+                self.db0.execute("UPDATE Invertion SET name = '{name}', startValue = {startValue}, "
+                                 "utilLife = {utilLife}, residualValue = {residualValue}, startDate = '{startDate}', "
+                                 "endDate = '{endDate}', qty = {qty} WHERE name == '{nameOld}'".format(
+                    name=inversion.name, startValue=inversion.startValue, utilLife=inversion.utilLife,
+                    residualValue=inversion.residualValue, startDate=inversion.startDate, endDate=inversion.endDate,
+                    qty=inversion.cant, nameOld=inversionOld.name
+                ))
+                self.commit()
+
             def inversionQuery(self, SELECT="*", QUERY=""):
                 self.db0.execute("SELECT {} FROM Invertion WHERE id != 0 {}".format(SELECT, QUERY))
                 return self.db0.fetchall()
@@ -3560,6 +3570,7 @@ try:
                 QDialog.__init__(self)
                 SQL.__init__(self)
                 self.setupUi(self)
+                self.setWindowIcon(QIcon(os.path.join("system", "image", "icono.png")))
 
                 self.user = User()
 
@@ -3596,7 +3607,7 @@ try:
 
                     item = QTreeWidgetItem(inversion.getTreeWidget())
                     self.inversionTreeWidget.addTopLevelItem(item)
-                self.patrimonioLabel.setText("Patrimonio: $ {}".format(patrimonio))
+                self.patrimonioLabel.setText("Patrimonio: $ {}".format(round(patrimonio, 4)))
 
             def selectInversion(self, item):
                 for i in self.inversionQuery(QUERY=" AND name == '{}'".format(item.text(0))):
@@ -3610,14 +3621,37 @@ try:
                     inversion.cant = i[7]
                     break
 
-                dialog = DialogNewInversionLayout(nuevo=False)
-                dialog.nombreLineEdit.setText(inversion.name)
-                dialog.valorInicialDoubleSpinBox.setValue(inversion.startValue)
-                dialog.vidaUtilDoubleSpinBox.setValue(inversion.utilLife)
-                dialog.valorResidualDoubleSpinBox.setValue(inversion.residualValue)
-                dialog.calendarWidget.setSelectedDate(inversion.startDate)
-                dialog.cantidadDoubleSpinBox.setValue(inversion.cant)
-                dialog.exec_()
+                opciones = DialogOpcionLayout(("Detalle", "Editar"))
+                if opciones.exec_():
+                    if opciones.action == opciones.actionDetalle:
+                        dialog = DialogNewInversionLayout(nuevo=False)
+                        dialog.nombreLineEdit.setText(inversion.name)
+                        dialog.valorInicialDoubleSpinBox.setValue(inversion.startValue)
+                        dialog.vidaUtilDoubleSpinBox.setValue(inversion.utilLife)
+                        dialog.valorResidualDoubleSpinBox.setValue(inversion.residualValue)
+                        dialog.calendarWidget.setSelectedDate(inversion.startDate)
+                        dialog.cantidadDoubleSpinBox.setValue(inversion.cant)
+
+                        dialog.nombreLineEdit.setReadOnly(True)
+                        dialog.valorInicialDoubleSpinBox.setReadOnly(True)
+                        dialog.vidaUtilDoubleSpinBox.setReadOnly(True)
+                        dialog.valorResidualDoubleSpinBox.setReadOnly(True)
+                        dialog.calendarWidget.setSelectionMode(0)
+                        dialog.cantidadDoubleSpinBox.setReadOnly(True)
+                        dialog.exec_()
+                    else:
+                        dialog = DialogNewInversionLayout(nuevo=False)
+                        dialog.editarPushButton.show()
+                        dialog.inversionOld.name = inversion.name
+                        dialog.nombreLineEdit.setText(inversion.name)
+                        dialog.valorInicialDoubleSpinBox.setValue(inversion.startValue)
+                        dialog.vidaUtilDoubleSpinBox.setValue(inversion.utilLife)
+                        dialog.valorResidualDoubleSpinBox.setValue(inversion.residualValue)
+                        dialog.calendarWidget.setSelectedDate(inversion.startDate)
+                        dialog.cantidadDoubleSpinBox.setValue(inversion.cant)
+                        dialog.exec_()
+
+                    self.loadInversionTreeWidget()
         # <> fin DialogActivosLayout
 
 
@@ -3627,9 +3661,13 @@ try:
                 QDialog.__init__(self)
                 SQL.__init__(self)
                 self.setupUi(self)
+                self.setWindowIcon(QIcon(os.path.join("system", "image", "icono.png")))
 
                 self.okPushButton.hide()
+                self.editarPushButton.hide()
                 self.nuevo = nuevo
+
+                self.inversionOld = Inversion()
 
                 self.calendarWidget.setMaximumDate(datetime.date.today())
 
@@ -3643,6 +3681,7 @@ try:
                 self.vidaUtilDoubleSpinBox.valueChanged.connect(self.calc)
                 self.valorResidualDoubleSpinBox.valueChanged.connect(self.calc)
                 self.cantidadDoubleSpinBox.valueChanged.connect(self.calc)
+                self.editarPushButton.clicked.connect(self.editar)
 
             def ok(self):
                 fecha = self.calendarWidget.selectedDate()
@@ -3660,6 +3699,24 @@ try:
                     self.accept()
                 else:
                     QMessageBox.critical(self, "Error", "No se ha podido insertar la inversion")
+
+            def editar(self):
+                fecha = self.calendarWidget.selectedDate()
+
+                inversion = Inversion()
+                inversion.name = self.nombreLineEdit.text()
+                inversion.startValue = self.valorInicialDoubleSpinBox.value()
+                inversion.startDate = datetime.date(year=fecha.year(), month=fecha.month(), day=fecha.day())
+                inversion.setUtilLife(self.vidaUtilDoubleSpinBox.value())
+                inversion.residualValue = self.valorResidualDoubleSpinBox.value()
+                inversion.cant = self.cantidadDoubleSpinBox.value()
+
+                try:
+                    self.inversionUpdate(inversion, self.inversionOld)
+                    QMessageBox.information(self, "Aviso", "Inversión editada correctamente :)")
+                    self.accept()
+                except:
+                    QMessageBox.critical(self, "Error", "No se pudo editar la inversión :(")
 
             def nombreTextChanged(self, txt):
                 if len(txt) > 5 and self.nuevo:
