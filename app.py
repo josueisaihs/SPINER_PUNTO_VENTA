@@ -481,8 +481,8 @@ try:
                                  "utilLife = {utilLife}, residualValue = {residualValue}, startDate = '{startDate}', "
                                  "endDate = '{endDate}', qty = {qty} WHERE name == '{nameOld}'".format(
                     name=inversion.name, startValue=inversion.startValue, utilLife=inversion.utilLife,
-                    residualValue=inversion.residualValue, startDate=inversion.startDate, endDate=inversion.endDate,
-                    qty=inversion.cant, nameOld=inversionOld.name
+                    residualValue=inversion.residualValue, startDate=inversion.startDate.isoformat(),
+                    endDate=inversion.endDate, qty=inversion.cant, nameOld=inversionOld.name
                 ))
                 self.commit()
 
