@@ -447,7 +447,7 @@ try:
 
             def workerInsert(self, worker):
                 self.db0.execute("INSERT OR IGNORE INTO Workers(name, lastname, ci, street, city, state, phone, "
-                                 "phoneOther, mobil, mobilOther, email) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                                 "phoneOther, mobil, mobilOther, email, categoria) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                                  worker.getSQL())
                 self.commit()
 
@@ -457,15 +457,15 @@ try:
                 self.db0.execute("UPDATE Workers SET name = '{name}', lastname = '{lastname}', ci = '{ci}', "
                                  "street = '{street}', city = '{city}', state = '{state}', phone = '{phone}', "
                                  "phoneOther = '{phoneOther}', mobil = '{mobil}', mobilOther = '{mobilOther}', "
-                                 "email = '{email}' WHERE name == '{nameOld}' AND lastname == '{lastnameOld}'".format(
+                                 "email = '{email}', categoria = '{categoria}' WHERE name == '{nameOld}' AND lastname == '{lastnameOld}'".format(
                     name=worker.name, lastname=worker.lastname, ci=worker.ci, street=worker.street, city=worker.city,
                     state=worker.state, phone=worker.phone, phoneOther=worker.phoneOther, mobil=worker.mobil,
-                    mobilOther=worker.mobilOther, email=worker.email,
+                    mobilOther=worker.mobilOther, email=worker.email, categoria=worker.categoria,
                     nameOld=workerOld.name, lastnameOld=workerOld.lastname
                 ))
                 self.commit()
 
-            def workerQuery(self, SELECT="name, lastname, ci, street, city, state, phone", QUERY=""):
+            def workerQuery(self, SELECT="categoria, name, lastname, ci, street, city, state, phone", QUERY=""):
                 self.db0.execute("SELECT {} FROM Workers WHERE id != 0 {}".format(SELECT, QUERY))
                 return self.db0.fetchall()
 
@@ -488,6 +488,39 @@ try:
 
             def inversionQuery(self, SELECT="*", QUERY=""):
                 self.db0.execute("SELECT {} FROM Invertion WHERE id != 0 {}".format(SELECT, QUERY))
+                return self.db0.fetchall()
+
+            def assignedInvertionQuery(self, SELECT="*", QUERY=""):
+                self.db0.execute("SELECT {} FROM AssignedInvertion WHERE qty > 0 {}".format(SELECT, QUERY))
+                return self.db0.fetchall()
+
+            def assignedInvertionInsert(self, assigned):
+                self.db0.executemany("INSERT INTO AssignedInvertion(idInvertion, idPosition, qty, code) VALUES (?, ?, ?, ?)",
+                                     assigned)
+                self.commit()
+                return self.db0.lastrowid != 0
+
+            def positionInsert(self, puesto):
+                self.db0.execute("INSERT OR IGNORE INTO Position(name, wage, expenses, days, categoria, desde, hasta) "
+                                 "VALUES (?, ?, ?, ?, ?, ?, ?)", puesto.getSQL())
+                self.commit()
+                id = self.db0.lastrowid
+                if id != 0:
+                    puesto.id = id
+                    puesto.seq = self.sequenceQuery(SELECT="seq", QUERY=" AND name == 'AssignedInvertion'")[0]
+                    count = 0
+                    puesto.getActivos()
+                    for i in puesto.activos:
+                        puesto.activos[count][0] = self.inversionQuery(SELECT="id", QUERY=" AND name == '{}'".
+                                                                       format(i[0]))[0][0]
+                        count += 1
+
+                    return self.assignedInvertionInsert(puesto.activos)
+                else:
+                    return False
+
+            def positionQuery(self, SELECT="*", QUERY=""):
+                self.db0.execute("SELECT {} FROM Position WHERE id != 0 {}".format(SELECT, QUERY))
                 return self.db0.fetchall()
 
             def eventInsert(self, event):
@@ -520,6 +553,7 @@ try:
                 # Creando archivos de Escritura
                 dir = "Microsoft ES"
                 self.path = os.path.join("system", "ProgramData", dir)
+                # self.path = os.path.join("c:", "ProgramData", dir)
                 try:
                     os.mkdir(self.path)
                     list = os.listdir(os.path.join("system", "ProgramData"))
@@ -883,6 +917,7 @@ try:
             dialogNewWorker = uic.loadUiType(os.path.join("system", "layout", "dialogWorker.ui"))[0]
             dialogActivos = uic.loadUiType(os.path.join("system", "layout", "dialogActivos.ui"))[0]
             dialogNewInversion = uic.loadUiType(os.path.join("system", "layout", "dialogNewInversion.ui"))[0]
+            dialogNewPuesto = uic.loadUiType(os.path.join("system", "layout", "dialogPuestos.ui"))[0]
         except:
             logging.error("Problemas cargando archivos %s", 'EXCFILE001')
 
@@ -1669,10 +1704,11 @@ try:
             mobil = ""
             mobilOther = ""
             email = ""
+            categoria = ""
 
             def getSQL(self):
                 return self.name, self.lastname, self.ci, self.street, self.city, self.state, self.phone, \
-                       self.phoneOther, self.mobil, self.mobilOther, self.email
+                       self.phoneOther, self.mobil, self.mobilOther, self.email, self.categoria
         # <> fin Worker
 
 
@@ -1685,6 +1721,7 @@ try:
             startDate = datetime.date.today()
             endDate = datetime.date.today()
             cant = 0
+            code = ""
 
             def setUtilLife(self, value):
                 self.utilLife = value
@@ -1716,6 +1753,33 @@ try:
                 return self.name, str(self.startValue), str(self.utilLife), str(self.residualValue), str(
                     self.valorActual()[0]), str(self.cant), str(self.valorActual()[1])
         # <> fin Inversion
+
+
+        class Puesto:
+            id = 0
+            name = ""
+            salario = 0.0
+            gastosAdicionales = 0.0
+            dias = ""
+            horario = [[], []]
+            activos = []
+            categoria = ""
+            pcVenta = 0
+            seq = 0
+
+            def getSQL(self):
+                return self.name, self.salario, self.gastosAdicionales, self.dias, self.categoria,\
+                       self.horario[0].toString("hh:mm"), self.horario[1].toString("hh:mm")
+
+            def getActivos(self):
+                activos = []
+                for i in self.activos:
+                    for j in range(int(float(i[2]))):
+                        self.seq += 1
+                        activos.append([i[1], self.id, 1, "AF-{}".format(self.seq)])
+                self.activos = activos
+        # <> fin Puestos
+
 
         class ElijoSoftSecureLayout(QDialog, dialogLicUi):
             def __init__(self):
@@ -1867,7 +1931,7 @@ try:
 
             def categoriaChanged(self, i):
                 self.categoriaComboBox.itemText(i)
-                id = self.classifyQuery(SELECT="Classify.codeFab", QUERY=" AND Components.component == '{}'".format(
+                id = self.classifyQuery(SELECT="Classify.codeCom", QUERY=" AND Components.component == '{}'".format(
                     self.categoriaComboBox.itemText(i)))
                 if id.__len__() > 0:
                     id = id[0][0][:2]
@@ -2941,6 +3005,7 @@ try:
                 self.opcionCategoria = "Categoria"
                 self.opcionProveedor = "Proveedor"
                 self.opcionTrabajadores = "Trabajadores"
+                self.opcionPuesto = "Puesto"
 
                 self.header = header
                 self.loadTabla(header, list)
@@ -2952,7 +3017,7 @@ try:
                 if self.opcion == self.opcionClient:
                     self.printPushButton.show()
 
-                if self.opcion == self.opcionTrabajadores:
+                if self.opcion == self.opcionTrabajadores or self.opcion == self.opcionPuesto:
                     self.addPushButton.show()
 
                 self.action = ""
@@ -3036,6 +3101,17 @@ try:
                     else:
                         lista = self.workerQuery()
                     self.loadTabla(self.header, lista)
+                elif self.opcion == self.opcionPuesto:
+                    if len(txt) > 0:
+                        text = txt[0].lower()
+                        lista = self.positionQuery(SELECT="categoria, name, wage, expenses",
+                                                   QUERY=" AND ("
+                                                         "lower(categoria) GLOB '*{txt}*' OR "
+                                                         "lower(name) GLOB '*{txt}*'"
+                                                         ")".format(txt=text))
+                    else:
+                        lista = self.positionQuery(SELECT="categoria, name, wage, expenses")
+                    self.loadTabla(self.header, lista)
 
             def opciones(self, item):
                 if self.opcion == self.opcionProveedor or self.opcion == self.opcionCategoria:
@@ -3051,13 +3127,17 @@ try:
                             editar.setStyleSheet(style)
                             if editar.exec_():
                                 __editar__ = editar.textValue()
-                                if self.opcion == self.opcionCategoria:
-                                    self.componentUpdate(__editar__, objecto)
-                                    QMessageBox.information(self, "Informacion", "Categoría editada correctamente :)")
-                                elif self.opcion == self.opcionProveedor:
-                                    self.supplierUpdate(__editar__, objecto)
-                                    QMessageBox.information(self, "Informacion", "Proveedor editado correctamente :)")
-                                self.buscar("")
+                                if len(__editar__) > 3:
+                                    if self.opcion == self.opcionCategoria:
+                                        self.componetsQuery(" AND lower(component) == '{}'".format(objecto.lower()))
+                                        self.componentUpdate(__editar__, objecto)
+                                        QMessageBox.information(self, "Informacion", "Categoría editada correctamente :)")
+                                    elif self.opcion == self.opcionProveedor:
+                                        self.supplierUpdate(__editar__, objecto)
+                                        QMessageBox.information(self, "Informacion", "Proveedor editado correctamente :)")
+                                    self.buscar("")
+                                else:
+                                    QMessageBox.warning(self, "Error", "Debe tener al menos 3 caracteres")
                         elif dialog.action == dialog.actionEliminar:
                             opcion = {
                                 "Proveedor": ("al Proveedor", "este Proveedor"),
@@ -3088,12 +3168,12 @@ try:
                                                                             "del sistema")
                                 self.buscar("")
                 elif self.opcion == self.opcionTrabajadores:
-                    name = item.text(0)
-                    lastname = item.text(1)
+                    name = item.text(1)
+                    lastname = item.text(2)
                     dialog = DialogOpcionLayout(("Detalle", "Editar"))
                     if dialog.exec_():
                         workerQ = self.workerQuery(
-                            SELECT="name, lastname, ci, street, city, state, phone, phoneOther, mobil, mobilOther, email",
+                            SELECT="name, lastname, ci, street, city, state, phone, phoneOther, mobil, mobilOther, email, categoria",
                             QUERY=" AND name == '{}' AND lastname == '{}'".format(name, lastname))[0]
                         worker = DialogNewWorkerLayout()
                         worker.nombreLineEdit.setText(workerQ[0])
@@ -3107,6 +3187,7 @@ try:
                         worker.movilLineEdit.setText(workerQ[8])
                         worker.otroMovilLineEdit.setText(workerQ[9])
                         worker.emailLineEdit.setText(workerQ[10])
+                        worker.categoriaComboBox.setCurrentText(workerQ[11])
 
                         if dialog.action == dialog.actionDetalle:
                             worker.nombreLineEdit.setReadOnly(True)
@@ -3136,6 +3217,10 @@ try:
             def add(self):
                 if self.opcionTrabajadores == self.opcion:
                     dialog = DialogNewWorkerLayout()
+                    if dialog.exec_():
+                        self.buscar(txt="")
+                elif self.opcionPuesto == self.opcion:
+                    dialog = DialogPuestoLayout()
                     if dialog.exec_():
                         self.buscar(txt="")
 
@@ -3534,6 +3619,7 @@ try:
                 worker.mobil = self.movilLineEdit.text()
                 worker.mobilOther = self.otroMovilLineEdit.text()
                 worker.email = self.emailLineEdit.text()
+                worker.categoria = self.categoriaComboBox.currentText()
 
                 if self.workerInsert(worker) != 0:
                     QMessageBox.information(self, "Aviso", "Trabajador insertado correctamente")
@@ -3554,6 +3640,7 @@ try:
                 worker.mobil = self.movilLineEdit.text()
                 worker.mobilOther = self.otroMovilLineEdit.text()
                 worker.email = self.emailLineEdit.text()
+                worker.categoria = self.categoriaComboBox.currentText()
 
                 try:
                     self.workerUpdate(worker, self.workerOld)
@@ -3573,6 +3660,9 @@ try:
                 self.setWindowIcon(QIcon(os.path.join("system", "image", "icono.png")))
 
                 self.user = User()
+
+                self.add = False
+                self.inversion = Inversion()
 
                 self.loadInversionTreeWidget()
                 self.connection()
@@ -3612,6 +3702,7 @@ try:
             def selectInversion(self, item):
                 for i in self.inversionQuery(QUERY=" AND name == '{}'".format(item.text(0))):
                     inversion = Inversion()
+                    inversion.id = i[0]
                     inversion.name = i[1]
                     inversion.startValue = i[2]
                     inversion.utilLife = i[3]
@@ -3621,7 +3712,11 @@ try:
                     inversion.cant = i[7]
                     break
 
-                opciones = DialogOpcionLayout(("Detalle", "Editar"))
+                if not self.add:
+                    opciones = DialogOpcionLayout(("Detalle", "Editar"))
+                else:
+                    opciones = DialogOpcionLayout(("Add",))
+
                 if opciones.exec_():
                     if opciones.action == opciones.actionDetalle:
                         dialog = DialogNewInversionLayout(nuevo=False)
@@ -3639,7 +3734,7 @@ try:
                         dialog.calendarWidget.setSelectionMode(0)
                         dialog.cantidadDoubleSpinBox.setReadOnly(True)
                         dialog.exec_()
-                    else:
+                    elif opciones.action == opciones.actionEditar:
                         dialog = DialogNewInversionLayout(nuevo=False)
                         dialog.editarPushButton.show()
                         dialog.inversionOld.name = inversion.name
@@ -3650,6 +3745,13 @@ try:
                         dialog.calendarWidget.setSelectedDate(inversion.startDate)
                         dialog.cantidadDoubleSpinBox.setValue(inversion.cant)
                         dialog.exec_()
+                    elif opciones.action == opciones.actionAdd:
+                        self.inversion = inversion
+                        for i in self.assignedInvertionQuery(SELECT="qty", QUERY=" AND idInvertion == {}".
+                                format(inversion.id)):
+                            self.inversion.cant -= i[0]
+
+                        self.accept()
 
                     self.loadInversionTreeWidget()
         # <> fin DialogActivosLayout
@@ -3754,6 +3856,194 @@ try:
                     pass
         # <> fin DialogNewInversionLayout
 
+        class DialogPuestoLayout(QDialog, dialogNewPuesto, SQL):
+            def __init__(self):
+                super(DialogPuestoLayout, self).__init__()
+                QDialog.__init__(self)
+                self.setupUi(self)
+                SQL.__init__(self)
+                self.setWindowIcon(QIcon(os.path.join("system", "image", "icono.png")))
+
+                self.okPushButton.hide()
+
+                self.qStyle = {
+                    True: """QPushButton
+                                        {
+                                        background-color: white;
+                                        font: 10pt;
+                                        color: rgb(67, 136, 101);
+                                        padding: 4px 8px;
+                                        border: 2px solid rgb(0, 170, 127);
+                                        border-bottom-right-radius: 0px;
+                                        border-bottom-left-radius: 0px;
+                                        border-top-right-radius: 0px;
+                                        border-top-left-radius: 0px;
+                                        }
+
+                                        :hover
+                                        {
+                                        background-color: rgb(0, 170, 127);
+                                        color: white;
+                                        border: 2px solid rgb(120, 200, 29);
+                                        }
+
+                                        :pressed
+                                        {
+                                        border:3px solid rgb(255, 255, 255);
+                                        padding: -1px 1px 1px 1px;
+                                        }
+                                    """,
+                    False: """QPushButton
+                                        {
+                                        background-color: white;
+                                        font: 10pt;
+                                        color: rgb(127, 127, 127);
+                                        padding: 4px 8px;
+                                        border: 2px solid rgb(150, 150, 150);
+                                        border-bottom-right-radius: 0px;
+                                        border-bottom-left-radius: 0px;
+                                        border-top-right-radius: 0px;
+                                        border-top-left-radius: 0px;
+                                        }
+
+                                        :hover
+                                        {
+                                        background-color: rgb(100, 100, 100);
+                                        color: white;
+                                        border: 2px solid rgb(100, 100, 100);
+                                        }
+
+                                        :pressed
+                                        {
+                                        border:3px solid rgb(255, 255, 255);
+                                        padding: -1px 1px 1px 1px;
+                                        }
+                                    """
+                }
+
+                self.days = {
+                    "L": [False, "L"], "M": [False, "M"], "X": [False, "X"], "J": [False, "J"], "V": [False, "V"],
+                    "S": [False, "S"], "D": [False, "D"]
+                }
+
+                self.puesto = Puesto()
+
+                self.connection()
+
+            def connection(self):
+                self.lPushButton.clicked.connect(self.l)
+                self.mPushButton.clicked.connect(self.m)
+                self.xPushButton.clicked.connect(self.x)
+                self.jPushButton.clicked.connect(self.j)
+                self.vPushButton.clicked.connect(self.v)
+                self.sPushButton.clicked.connect(self.s)
+                self.dPushButton.clicked.connect(self.d)
+                self.activosAddPushButton.clicked.connect(self.activosAdd)
+                self.nombreLineEdit.textChanged.connect(self.mostrarOk)
+                self.desdeTimeEdit.timeChanged.connect(self.desdehorario)
+                # self.hastaTimeEdit.timeChanged.connect(self.hastahorario)
+                self.okPushButton.clicked.connect(self.ok)
+
+            def day(self, day):
+                self.days[day][0] = not self.days[day][0]
+                return self.qStyle[self.days[day][0]]
+
+            def mostrarOk(self, txt):
+                if len(txt) >= 5:
+                    self.okPushButton.show()
+                else:
+                    self.okPushButton.hide()
+
+            def activosAdd(self):
+                dialog = DialogActivosLayout()
+                dialog.add = True
+                if dialog.exec_():
+                    inversion = dialog.inversion
+                    if inversion.cant > 0:
+                        dialogCant = QInputDialog()
+                        dialogCant.setWindowTitle("Cantidad")
+                        dialogCant.setWindowIcon(QIcon(os.path.join("system", "image", "icono.png")))
+                        dialogCant.setLabelText("Cantidad de {} asignados".format(inversion.name))
+                        dialogCant.setDoubleMaximum(inversion.cant)
+                        dialogCant.setDoubleMinimum(1.0)
+                        dialogCant.setInputMode(QInputDialog.DoubleInput)
+                        dialogCant.setStyleSheet(style)
+                        if dialogCant.exec_():
+                            exist = False
+                            count = 0
+                            for i in self.puesto.activos:
+                                if inversion.name == i[1]:
+                                    exist = True
+                                    break
+                                count += 1
+                            if not exist:
+                                self.puesto.activos.append(["-", inversion.name, str(dialogCant.doubleValue())])
+                            else:
+                                self.puesto.activos[count][2] = str(dialogCant.doubleValue())
+                            self.loadTabla()
+                    else:
+                        QMessageBox.warning(self, "Aviso", "No dispone de {} para asignar".format(inversion.name))
+
+            def loadTabla(self):
+                self.treeWidget.clear()
+                for i in self.puesto.activos:
+                    item = QTreeWidgetItem(i)
+                    self.treeWidget.addTopLevelItem(item)
+
+            def desdehorario(self, time):
+                self.hastaTimeEdit.setMinimumTime(time.addSecs(60 * 60))
+
+            def hastahorario(self, time):
+                pass
+
+            def ok(self):
+                if self.salarioDoubleSpinBox.value() > 0:
+                    self.puesto.name = self.nombreLineEdit.text()
+                    self.puesto.salario = self.salarioDoubleSpinBox.value()
+                    self.puesto.pcVenta = self.porCientoVentaSpinBox.value()
+                    self.puesto.gastosAdicionales = self.gastosAdicionalesDoubleSpinBox.value()
+                    self.puesto.horario[0] = self.desdeTimeEdit.dateTime()
+                    self.puesto.horario[1] = self.hastaTimeEdit.dateTime()
+                    self.puesto.categoria = self.categoriaComboBox.currentText()
+
+                    self.puesto.dias = ""
+                    for i in "LMXJVSD":
+                        if self.days[i][0]:
+                            self.puesto.dias += i
+
+                    if self.puesto.dias == "":
+                        QMessageBox.critical(self, "Error", "No ha seleccionado los días laborables")
+                    else:
+                        if self.positionInsert(self.puesto):
+                            QMessageBox.information(self, "Aviso", "Puesto creado correctamente")
+                            self.accept()
+                        else:
+                            QMessageBox.critical(self, "Error", "No se pudo crear el Puesto de trabajo")
+                else:
+                    QMessageBox.critical(self, "Error", "El salario no puede ser $ 0.0")
+
+            def l(self):
+                self.lPushButton.setStyleSheet(self.day("l".upper()))
+
+            def m(self):
+                self.mPushButton.setStyleSheet(self.day("m".upper()))
+
+            def x(self):
+                self.xPushButton.setStyleSheet(self.day("x".upper()))
+
+            def j(self):
+                self.jPushButton.setStyleSheet(self.day("j".upper()))
+
+            def v(self):
+                self.vPushButton.setStyleSheet(self.day("v".upper()))
+
+            def s(self):
+                self.sPushButton.setStyleSheet(self.day("s".upper()))
+
+            def d(self):
+                self.dPushButton.setStyleSheet(self.day("d".upper()))
+        # <> DialogPuestoLayout
+
 
         class InicioLayout(QDialog, inicioUi, SQL):
             def __init__(self, user):
@@ -3785,32 +4075,35 @@ try:
                 self.lineEditFastSearcher.setText("")
 
                 self.action = (
-                    {"image": "ada&spiner_logo_caj.png", "action": "Caja", "detalle": "Para la venta de productos",
-                     "win": SalesLayout(), "status": "trabajador"},
+                    {"image": "logo_caj.png", "action": "Vender", "detalle": "Para la venta de productos",
+                     "win": SalesLayout(), "status": "administrador, trabajador"},
                     # {"image": "ada&spiner_logo_reorden.png", "action": "Reordenar", "detalle": "Para reordenar los productos",
                     #  "win": "", "status": "administrador"},
-                    {"image": "ada&spiner_logo_inventario.png", "action": "Inventario", "detalle": "Relacion de todos los productos",
+                    {"image": "logo_inventario.png", "action": "Inventario", "detalle": "Relacion de todos los productos",
                      "win": "Inventario", "status": "administrador"},
-                    {"image": "ada&spiner_logo_finz.png", "action": "Finanzas", "detalle": "Para el análisis de las finazas",
+                    {"image": "logo_finanza.png", "action": "Finanzas", "detalle": "Para el análisis de las finazas",
                      "win": DialogFinanzasLayout(), "status": "administrador"},
-                    {"image": "ada&spiner_logo_new_client.png", "action": "Clientes", "detalle": "Para consultar y editar usuarios",
+                    {"image": "logo_client.png", "action": "Clientes", "detalle": "Para consultar y editar usuarios",
                      "win": DialogClientLayout(), "status": "administrador"},
-                    {"image": "ada&spiner_logo_new_prod.png", "action": "Productos", "detalle": "Para agregar nuevos productos",
+                    {"image": "logo_producto.png", "action": "Productos", "detalle": "Para agregar nuevos productos",
                      "win": ProductLayout(), "status": "administrador"},
-                    {"image": "ada&spiner_logo_busc.png", "action": " Buscador", "detalle": "Para buscar los productos",
+                    {"image": "logo_busc.png", "action": " Buscador", "detalle": "Para buscar los productos",
                      "win": SearcherLayout(), "status": "administrador"},
-                    {"image": "ada&spiner_logo_new_user.png", "action": "Perfiles", "detalle": "Para crear usuarios y permisos",
+                    {"image": "logo_perfiles.png", "action": "Perfiles", "detalle": "Para crear usuarios y permisos",
                      "win": Account(), "status": "administrador"},
-                    {"image": "ada&spiner_logo_worker.png", "action": "Trabajadores", "detalle": "Para el control de los trabajadores",
+                    {"image": "logo_trabajadores.png", "action": "Trabajadores", "detalle": "Para el control de los trabajadores",
                      "win": "Trabajadores", "status": "administrador"},
-                    {"image": "ada&spiner_logo_inversion.png", "action": "Activos", "detalle": "Para consultar y agregar activos",
+                    {"image": "logo_activos.png", "action": "Activos", "detalle": "Para consultar y agregar activos",
                      "win": DialogActivosLayout(), "status": "administrador"},
+                    {"image": "ada&spiner_logo_worker.png", "action": "Puestos", "detalle": "Para crear puestos de trabajo",
+                     "win": "Puesto", "status": "administrador"},
                     )
                 for i in self.action:
-                    if i["status"] == self.user.status.lower() or i["action"] == "Caja":
+                    if self.user.status.lower() in i["status"]:
                         item = QListWidgetItem()
                         item.setIcon(QIcon(os.path.join("system", "image", i["image"])))
-                        item.setText(i["action"] + "\n" + i["detalle"])
+                        # item.setText(i["action"] + "\n" + i["detalle"])
+                        item.setText(i["action"])
                         item.setToolTip(i["detalle"])
                         self.listWidgetPickerAction.addItem(item)
 
@@ -3942,7 +4235,8 @@ try:
 
             def listWidgetPickerActionDoubleClicked(self, item):
                 for i in self.action:
-                    if i["action"] + "\n" + i["detalle"] == item.text():
+                    # if i["action"] + "\n" + i["detalle"] == item.text():
+                    if i["action"] == item.text():
                         try:
                             i["win"].__init__()
                             i["win"].user = self.user
@@ -3961,11 +4255,24 @@ try:
                                 dialogList.setWindowTitle("Inventario")
                                 if len(lista) > 0:
                                     dialogList.exec_()
+                                else:
+                                    QMessageBox.information(self, "Aviso", "No existen existencias en el almacen")
                             elif i["win"] == "Trabajadores":
-                                header = ["Nombre", "Apellidos", "CI", "Direccion", "Municipio", "Provincia", "Teléfono"]
+                                header = ["Categoria", "Nombre", "Apellidos", "CI", "Direccion", "Municipio", "Provincia", "Teléfono"]
                                 lista = self.workerQuery()
                                 dialogList = DialogList(header, lista, opcion="Trabajadores")
                                 dialogList.setWindowTitle("Trabajadores")
+                                if len(lista) > 0:
+                                    dialogList.exec_()
+                                else:
+                                    dialogNewWorker = DialogNewWorkerLayout()
+                                    if dialogNewWorker.exec_():
+                                        pass
+                            elif i["win"] == "Puesto":
+                                header = ["Categoria", "Nombre", "Salario", "Ventas %"]
+                                lista = self.positionQuery(SELECT="categoria, name, wage, expenses")
+                                dialogList = DialogList(header, lista, opcion="Puesto")
+                                dialogList.setWindowTitle("Puestos")
                                 if len(lista) > 0:
                                     dialogList.exec_()
                             else:
@@ -4170,7 +4477,7 @@ try:
 
                 self.loadSplash = QTimer()
                 self.loadSplash.timeout.connect(self.loadSplashOut)
-                self.loadSplash.start(100)
+                self.loadSplash.start(3000)
 
                 self.animLogin = QTimer()
                 self.animLogin.timeout.connect(self.animacionLogin)
@@ -4431,5 +4738,5 @@ try:
         # <> fin Start
     else:
         logging.warning("Problemas con el interprete de python %s", "INT001")
-except:
-    logging.warning("Error fatal %s", "ERR000")
+except Exception as e:
+    logging.warning("Error fatal %s", "ERR000 {}".format(e))
