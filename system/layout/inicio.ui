@@ -397,7 +397,7 @@ background: rgb(200, 15, 20);
                             </string>
       </property>
       <property name="text">
-       <string>Deudas</string>
+       <string>Cuentas</string>
       </property>
       <property name="alignment">
        <set>Qt::AlignCenter</set>
@@ -453,7 +453,7 @@ background: rgb(200, 15, 20);
     <rect>
      <x>500</x>
      <y>5</y>
-     <width>40</width>
+     <width>30</width>
      <height>21</height>
     </rect>
    </property>
@@ -482,7 +482,7 @@ background: rgb(200, 15, 20);
     <rect>
      <x>770</x>
      <y>5</y>
-     <width>40</width>
+     <width>30</width>
      <height>21</height>
     </rect>
    </property>
