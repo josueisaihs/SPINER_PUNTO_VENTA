@@ -1,0 +1,561 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Dialog</class>
+ <widget class="QDialog" name="Dialog">
+  <property name="windowModality">
+   <enum>Qt::ApplicationModal</enum>
+  </property>
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>450</width>
+    <height>405</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>450</width>
+    <height>405</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>450</width>
+    <height>405</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>Nuevo Trabajador</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">QMainWindow, QDialog{
+                background-color: rgb(255, 255, 255);
+                }
+
+                /**** QPushButton (enabled) ****/
+                QPushButton
+                {
+                background-color: rgb(85, 170, 255);
+                font: 10pt;
+                color: rgb(255, 255, 255);
+                padding: 4px 8px;
+                border: 2px solid rgb(85, 170, 255);
+                border-radius: 8px;
+                padding: 5px;
+                }
+
+                QPushButton:hover
+                {
+                background-color: rgb(0, 121, 182);
+                border: 2px solid rgb(66, 133, 199);
+                }
+
+                QPushButton:pressed
+                {
+                border:3px solid rgb(66, 133, 199);
+                padding: -1px 1px 1px 1px;
+                }
+
+                /******* QLabel ***********/
+                QLabel{
+                color: rgb(120, 120, 120)
+                }
+                labelHab1:hover{
+                color: rgb(120, 0, 0)
+                }
+
+                /*******QLineEdit************/
+                QTextEdit {
+                font: 10pt;
+                color: rgb(120, 120, 120);
+                border: 1px solid rgb(156, 156, 156);
+                border-radius: 0px;
+                padding: 2px;
+                }
+                QLineEdit, QDateEdit, QDoubleSpinBox, QSpinBox{
+                font: 10pt;
+                color: rgb(120, 120, 120);
+                border: 1px solid rgb(156, 156, 156);
+                border-radius: 0px;
+                padding: 2px;
+                border-top: 1px white;
+                border-left: 1px white;
+                border-right: 1px white;
+                }
+                /********QComboBox*******/
+                QComboBox{
+                font: 10pt;
+                color: rgb(120, 120, 120);
+                border: 1px solid rgb(156, 156, 156);
+                padding: 2px;
+                selection-background-color: white;
+                selection-color: rgb(120, 120, 120);
+                border-top: 1px white;
+                border-left: 1px white;
+                border-right: 1px white;
+                }
+                QComboBox QAbstractItemView
+                {
+                background-color: white;
+                color:rgb(120, 120, 120);
+                padding: 4px;
+                border: 1px solid rgb(156, 156, 156);
+                border-top: 1px white;
+                border-left: 1px white;
+                border-right: 1px white;
+                }
+
+                QLineEdit:hover, QDateEdit:hover, QDoubleSpinBox:hover, QComboBox:hover
+                {
+                color: rgb(85, 170, 255);
+                border: 1px solid rgb(85, 170, 255);
+                border-top: 1px white;
+                border-left: 1px white;
+                border-right: 1px white;
+                }
+
+                QLineEdit:focus, QDateEdit:focus, QDoubleSpinBox:focus, QComboBox:focus
+                {
+                border-color: rgb(90,200,255);
+                border-top: 1px white;
+                border-left: 1px white;
+                border-right: 1px white;
+                }
+
+                QToolTip
+                {
+                background-color:rgb(85, 170, 255);
+                color: white;
+                border: 1px solid rgb(85, 170, 255);
+                opacity: 50;
+                padding: 1px;
+                }
+                QTabWidget
+                {
+                background-color: transparent;
+                }
+
+                QTabWidget::pane {
+                border-top: 1px solid rgb(156, 156, 156);
+                border-bottom: 1px solid rgb(156, 156, 156);
+                position: absolute;
+                top: -0.25em;
+                }
+                /**** QTabWidget (disabled) ****/
+                QTabWidget::pane:disabled
+                {
+                border-color: rgb(60,60,60);
+                }
+
+                QTabWidget::tab-bar {
+                alignment: center;
+                border: 1px white;
+                border-radius: 5px;
+                }
+
+                QTreeView
+                {
+                alternate-background-color: rgb(200,200,200);
+                background-color: white;
+                border: 1px solid rgb(156, 156, 156);
+                font: 10pt;
+                color: rgb(120,120,120);
+                selection-background-color:rgb(90,200,255);
+                selection-color: rgb(156, 156, 156);
+                }
+                QListView{
+                alternate-background-color: rgb(200,200,200);
+                background-color: white;
+                border: 1px solid rgb(255, 255, 255);
+                font: 8pt;
+                color: rgb(120,120,120);
+                selection-background-color:rgb(90,200,255);
+                selection-color: rgb(156, 156, 156);
+                }
+            </string>
+  </property>
+  <property name="modal">
+   <bool>true</bool>
+  </property>
+  <widget class="QWidget" name="formLayoutWidget">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>10</y>
+     <width>431</width>
+     <height>384</height>
+    </rect>
+   </property>
+   <layout class="QFormLayout" name="formLayout">
+    <item row="0" column="0">
+     <widget class="QLabel" name="nombreLabel">
+      <property name="text">
+       <string>Nombre</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="1">
+     <widget class="QLineEdit" name="nombreLineEdit">
+      <property name="inputMethodHints">
+       <set>Qt::ImhNone</set>
+      </property>
+      <property name="inputMask">
+       <string/>
+      </property>
+      <property name="maxLength">
+       <number>100</number>
+      </property>
+      <property name="placeholderText">
+       <string>Escriba el nombre del trabajador</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0">
+     <widget class="QLabel" name="apellidosLabel">
+      <property name="text">
+       <string>Apellidos</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="1">
+     <widget class="QLineEdit" name="apellidosLineEdit">
+      <property name="inputMask">
+       <string/>
+      </property>
+      <property name="maxLength">
+       <number>100</number>
+      </property>
+      <property name="placeholderText">
+       <string>Escriba los apellidos del trabajador</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="0">
+     <widget class="QLabel" name="cILabel">
+      <property name="text">
+       <string>CI</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="1">
+     <widget class="QLineEdit" name="cILineEdit">
+      <property name="inputMask">
+       <string>99999999999</string>
+      </property>
+      <property name="placeholderText">
+       <string>Escriba el número de carnet del trabajador</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="0">
+     <widget class="QLabel" name="direccionLabel">
+      <property name="text">
+       <string>Direccion</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="1">
+     <layout class="QFormLayout" name="formLayout_2">
+      <item row="0" column="0">
+       <widget class="QLabel" name="calleLabel">
+        <property name="text">
+         <string>Calle</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="calleLineEdit">
+        <property name="maxLength">
+         <number>120</number>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="municipioLabel">
+        <property name="text">
+         <string>Municipio</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QLineEdit" name="municipioLineEdit">
+        <property name="maxLength">
+         <number>80</number>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="provinciaLabel">
+        <property name="text">
+         <string>Provincia</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QLineEdit" name="provinciaLineEdit">
+        <property name="text">
+         <string>La Habana</string>
+        </property>
+        <property name="maxLength">
+         <number>100</number>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="4" column="0">
+     <widget class="QLabel" name="telefonoLabel">
+      <property name="text">
+       <string>Telefono</string>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="1">
+     <layout class="QFormLayout" name="formLayout_3">
+      <item row="0" column="0">
+       <widget class="QLabel" name="casaLabel">
+        <property name="text">
+         <string>Casa</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="casaLineEdit">
+        <property name="inputMask">
+         <string>9-9-99-99-99</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="otroCasaLabel">
+        <property name="text">
+         <string>Otro Casa</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QLineEdit" name="otroCasaLineEdit">
+        <property name="inputMask">
+         <string>9-9-99-99-99</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="movilLabel">
+        <property name="text">
+         <string>Movil</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QLineEdit" name="movilLineEdit">
+        <property name="inputMask">
+         <string>+53 99-99-99-99</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="otroMovilLabel">
+        <property name="text">
+         <string>Otro Movil</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QLineEdit" name="otroMovilLineEdit">
+        <property name="inputMask">
+         <string>+53 99-99-99-99</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="5" column="0">
+     <widget class="QLabel" name="emailLabel">
+      <property name="text">
+       <string>Email</string>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="1">
+     <widget class="QLineEdit" name="emailLineEdit">
+      <property name="inputMethodHints">
+       <set>Qt::ImhEmailCharactersOnly</set>
+      </property>
+      <property name="inputMask">
+       <string/>
+      </property>
+      <property name="placeholderText">
+       <string>Escriba el correo electronico del trabajador</string>
+      </property>
+     </widget>
+    </item>
+    <item row="7" column="1">
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="okPushButton">
+        <property name="styleSheet">
+         <string notr="true">QPushButton
+                                        {
+                                        background-color: white;
+                                        font: 10pt;
+                                        color: rgb(67, 136, 101);
+                                        padding: 4px 8px;
+                                        border: 2px solid rgb(0, 170, 127);
+                                        border-bottom-right-radius: 0px;
+                                        border-bottom-left-radius: 0px;
+                                        border-top-right-radius: 0px;
+                                        border-top-left-radius: 0px;
+                                        }
+
+                                        :hover
+                                        {
+                                        background-color: rgb(0, 170, 127);
+                                        color: white;
+                                        border: 2px solid rgb(120, 200, 29);
+                                        }
+
+                                        :pressed
+                                        {
+                                        border:3px solid rgb(255, 255, 255);
+                                        padding: -1px 1px 1px 1px;
+                                        }
+                                    </string>
+        </property>
+        <property name="text">
+         <string>Ok</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="editarPushButton">
+        <property name="styleSheet">
+         <string notr="true">QPushButton
+                                        {
+                                        background-color: white;
+                                        font: 10pt;
+                                        color: rgb(67, 136, 101);
+                                        padding: 4px 8px;
+                                        border: 2px solid rgb(0, 170, 127);
+                                        border-bottom-right-radius: 0px;
+                                        border-bottom-left-radius: 0px;
+                                        border-top-right-radius: 0px;
+                                        border-top-left-radius: 0px;
+                                        }
+
+                                        :hover
+                                        {
+                                        background-color: rgb(0, 170, 127);
+                                        color: white;
+                                        border: 2px solid rgb(120, 200, 29);
+                                        }
+
+                                        :pressed
+                                        {
+                                        border:3px solid rgb(255, 255, 255);
+                                        padding: -1px 1px 1px 1px;
+                                        }
+                                    </string>
+        </property>
+        <property name="text">
+         <string>Editar</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="cancelarPushButton">
+        <property name="styleSheet">
+         <string notr="true">QPushButton{
+                                        background-color: white;
+                                        font: 10pt;
+                                        color: rgb(255, 86, 71);
+                                        padding: 4px 8px;
+                                        border: 2px solid rgb(217, 71, 60);
+                                        border-bottom-right-radius: 0px;
+                                        border-bottom-left-radius: 0px;
+                                        border-top-right-radius: 0px;
+                                        border-top-left-radius: 0px;
+                                        }
+
+                                        :hover{
+                                        background-color: rgb(217, 71, 60);
+                                        border: 2px solid rgb(255, 86, 71);
+                                        color: white;
+                                        }
+
+                                        :pressed{
+                                        border:3px solid rgb(255, 255, 255);
+                                        padding: -1px 1px 1px 1px;
+                                        }
+                                    </string>
+        </property>
+        <property name="text">
+         <string>Cancelar</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="6" column="1">
+     <widget class="QComboBox" name="categoriaComboBox">
+      <item>
+       <property name="text">
+        <string>A</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>B</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>C</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item row="6" column="0">
+     <widget class="QLabel" name="categoriaLabel">
+      <property name="text">
+       <string>Categoria</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <tabstops>
+  <tabstop>nombreLineEdit</tabstop>
+  <tabstop>apellidosLineEdit</tabstop>
+  <tabstop>cILineEdit</tabstop>
+  <tabstop>calleLineEdit</tabstop>
+  <tabstop>municipioLineEdit</tabstop>
+  <tabstop>provinciaLineEdit</tabstop>
+  <tabstop>casaLineEdit</tabstop>
+  <tabstop>otroCasaLineEdit</tabstop>
+  <tabstop>movilLineEdit</tabstop>
+  <tabstop>otroMovilLineEdit</tabstop>
+  <tabstop>emailLineEdit</tabstop>
+  <tabstop>categoriaComboBox</tabstop>
+  <tabstop>okPushButton</tabstop>
+  <tabstop>editarPushButton</tabstop>
+  <tabstop>cancelarPushButton</tabstop>
+ </tabstops>
+ <resources/>
+ <connections/>
+</ui>

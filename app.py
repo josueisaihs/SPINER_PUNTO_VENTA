@@ -552,6 +552,29 @@ if sys.version == '3.6.0 |Anaconda 4.3.1 (64-bit)| (default, Dec 23 2016, 11:57:
             self.db0.execute("SELECT {} FROM Position WHERE id != 0 {}".format(SELECT, QUERY))
             return self.db0.fetchall()
 
+        def workspacesInsert(self, workspace):
+            self.db0.execute("INSERT OR IGNORE INTO Workspaces(name) VALUES (?)", workspace.get_sql())
+            self.commit()
+            id = self.db0.lastrowid
+            if id != 0:
+                position = []
+                for i in workspace.puesto:
+                    id_position = self.positionQuery(SELECT="id", QUERY=" AND name == '{}'".format(i[0]))[0][0]
+                    id_worker = self.workerQuery(SELECT="id", QUERY=" AND name == '{}' AND lastname == '{}'".
+                                                 format(i[1], i[2]))[0][0]
+                    position.append([id, id_position, id_worker])
+
+                self.db0.executemany("INSERT OR IGNORE INTO AssignedWorkspace(id_workspace, id_position, id_worker) "
+                                 "VALUES(?, ?, ?)", position)
+                self.commit()
+                return self.db0.lastrowid != 0
+            else:
+                return False
+
+        def workspacesQuery(self, SELECT="", QUERY=""):
+            self.db0.execute("SELECT {} FROM Workspaces WHERE id != 0 {}".format(SELECT, QUERY))
+            return self.db0.fetchall()
+
         def eventInsert(self, event):
             self.db0.execute("INSERT INTO Events(id_user, event, operation) VALUES (?, ?, ?)", event)
 
@@ -852,6 +875,7 @@ if sys.version == '3.6.0 |Anaconda 4.3.1 (64-bit)| (default, Dec 23 2016, 11:57:
     dialogNewInversionUi = uic.loadUiType(os.path.join("system", "layout", "dialogNewInversion.ui"))[0]
     dialogNewPuestoUi = uic.loadUiType(os.path.join("system", "layout", "dialogPuestos.ui"))[0]
     dialogKardexUi = uic.loadUiType(os.path.join("system", "layout", "dialogKardex.ui"))[0]
+    dialogAreasTrabajoUi = uic.loadUiType(os.path.join("system", "layout", "dialogAsignacion.ui"))[0]
 
 
     class ProductDetalle:
@@ -3029,6 +3053,10 @@ if sys.version == '3.6.0 |Anaconda 4.3.1 (64-bit)| (default, Dec 23 2016, 11:57:
             self.opcionProveedor = "Proveedor"
             self.opcionTrabajadores = "Trabajadores"
             self.opcionPuesto = "Puesto"
+            self.opcionAreaTrabajo = "Area Trabajo"
+            self.opcionAsignarTrabajador = "Asignar Trabajador"
+            self.puesto = "*"
+            self.opcionAsignarPuesto = "Asignar Puesto"
 
             self.header = header
             self.loadTabla(header, list)
@@ -3040,8 +3068,15 @@ if sys.version == '3.6.0 |Anaconda 4.3.1 (64-bit)| (default, Dec 23 2016, 11:57:
             if self.opcion == self.opcionClient:
                 self.printPushButton.show()
 
-            if self.opcion == self.opcionTrabajadores or self.opcion == self.opcionPuesto:
-                self.addPushButton.show()
+            add = [
+                self.opcionAreaTrabajo, self.opcionTrabajadores, self.opcionPuesto, self.opcionAsignarTrabajador,
+                self.opcionAsignarPuesto,
+            ]
+
+            for i in add:
+                if self.opcion == i:
+                    self.addPushButton.show()
+                    break
 
             self.action = ""
             self.actionPrint = "print"
@@ -3052,9 +3087,14 @@ if sys.version == '3.6.0 |Anaconda 4.3.1 (64-bit)| (default, Dec 23 2016, 11:57:
             self.cancelPushButton.clicked.connect(self.cancel)
             self.printPushButton.clicked.connect(self.print)
             self.searchLineEdit.textChanged.connect(self.buscar)
-            if self.opcion == self.opcionCategoria or self.opcion == self.opcionProveedor \
-                    or self.opcion == self.opcionTrabajadores or self.opcion == self.opcionPuesto:
-                self.tablaTreeWidget.itemDoubleClicked.connect(self.opciones)
+            itemDoubleClicked = [
+                self.opcionCategoria, self.opcionProveedor, self.opcionTrabajadores, self.opcionPuesto,
+                self.opcionAsignarTrabajador, self.opcionAsignarPuesto, self.opcionAreaTrabajo
+            ]
+            for i in itemDoubleClicked:
+                if self.opcion == i:
+                    self.tablaTreeWidget.itemDoubleClicked.connect(self.opciones)
+                    break
             self.addPushButton.clicked.connect(self.add)
 
         def loadTabla(self, header, list):
@@ -3111,20 +3151,46 @@ if sys.version == '3.6.0 |Anaconda 4.3.1 (64-bit)| (default, Dec 23 2016, 11:57:
                     lista = self.classifyQuery(SELECT="DISTINCT Classify.supplier",
                                                QUERY=" AND lower(Classify.supplier) GLOB '*' ")
                 self.loadTabla(self.header, lista)
-            elif self.opcion == self.opcionTrabajadores:
+            elif self.opcion == self.opcionTrabajadores or self.opcion == self.opcionAsignarTrabajador:
                 if len(txt) > 0:
                     text = txt[0].lower()
-                    lista = self.workerQuery(QUERY=" AND ("
-                                                   "lower(name) GLOB '*{txt}*' OR "
-                                                   "lower(lastname) GLOB '*{txt}*' OR "
-                                                   "lower(street) GLOB '*{txt}*' OR "
-                                                   "lower(city) GLOB '*{txt}*' OR "
-                                                   "lower(state) GLOB '*{txt}*'"
-                                                   ")".format(txt=text))
+                    if self.opcionAsignarTrabajador == self.opcion:
+                        ids = ""
+                        for i in self.queryFree(SELECT="id_worker",
+                                                FROM="AssignedWorkspace",
+                                                QUERY=" id_worker != 0"):
+                            ids += "AND id != {}".format(i[0])
+                        ids += " AND "
+
+                        lista = self.workerQuery(QUERY=" AND lower(categoria) == lower('{puesto}') {ids} ("
+                                                       "lower(name) GLOB '*{txt}*' OR "
+                                                       "lower(lastname) GLOB '*{txt}*' OR "
+                                                       "lower(street) GLOB '*{txt}*' OR "
+                                                       "lower(city) GLOB '*{txt}*' OR "
+                                                       "lower(state) GLOB '*{txt}*'"
+                                                       ")".format(txt=text, puesto=self.puesto, ids=ids))
+                    else:
+                        lista = self.workerQuery(QUERY=" AND ("
+                                                       "lower(name) GLOB '*{txt}*' OR "
+                                                       "lower(lastname) GLOB '*{txt}*' OR "
+                                                       "lower(street) GLOB '*{txt}*' OR "
+                                                       "lower(city) GLOB '*{txt}*' OR "
+                                                       "lower(state) GLOB '*{txt}*'"
+                                                       ")".format(txt=text))
                 else:
-                    lista = self.workerQuery()
+                    if self.opcionAsignarTrabajador == self.opcion:
+                        ids = ""
+                        for i in self.queryFree(SELECT="id_worker",
+                                                FROM="AssignedWorkspace",
+                                                QUERY=" id_worker != 0"):
+                            ids += " AND id != {}".format(i[0])
+
+                        lista = self.workerQuery(QUERY=" AND lower(categoria) == lower('{puesto}') {ids}".
+                                                 format(puesto=self.puesto, ids=ids))
+                    else:
+                        lista = self.workerQuery()
                 self.loadTabla(self.header, lista)
-            elif self.opcion == self.opcionPuesto:
+            elif self.opcion == self.opcionPuesto or self.opcion == self.opcionAsignarPuesto:
                 if len(txt) > 0:
                     text = txt[0].lower()
                     lista = self.positionQuery(SELECT="categoria, name, wage, expenses",
@@ -3134,6 +3200,14 @@ if sys.version == '3.6.0 |Anaconda 4.3.1 (64-bit)| (default, Dec 23 2016, 11:57:
                                                      ")".format(txt=text))
                 else:
                     lista = self.positionQuery(SELECT="categoria, name, wage, expenses")
+                self.loadTabla(self.header, lista)
+            elif self.opcion == self.opcionAreaTrabajo:
+                if len(txt) > 0:
+                    text = txt[0].lower()
+                    lista = self.workspacesQuery(SELECT="name",
+                                                 QUERY=" AND lower(name) GLOB '*{}*'".format(text))
+                else:
+                    lista = self.workspacesQuery(SELECT="name")
                 self.loadTabla(self.header, lista)
 
         def opciones(self, item):
@@ -3308,14 +3382,129 @@ if sys.version == '3.6.0 |Anaconda 4.3.1 (64-bit)| (default, Dec 23 2016, 11:57:
                         dialogNewPuesto.exec_()
                     else:
                         pass
+            elif self.opcion == self.opcionAreaTrabajo:
+                name = item.text(0)
+                dialog = DialogOpcionLayout(("Detalle",))
+                if dialog.exec_():
+                    if dialog.action == dialog.actionDetalle:
+                        dialogAreasTrabajo = DialogAreasTrabajo(edit=False)
+                        dialogAreasTrabajo.nombreLineEdit.setText(name)
+
+                        dialogAreasTrabajo.workspace.puesto = \
+                            self.queryFree(SELECT="p.name, w.name, w.lastname",
+                                           FROM="Position p, Workers w, Workspaces s, AssignedWorkspace a",
+                                           QUERY="a.id_position == p.id AND a.id_worker == w.id "
+                                                 "AND s.id == a.id_workspace AND s.name == '{}'".format(name))
+                        dialogAreasTrabajo.loadTabla()
+                        dialogAreasTrabajo.exec_()
+            elif self.opcion == self.opcionAsignarPuesto:
+                name = item.text(1)
+                dialog = DialogOpcionLayout(("Detalle", "Add"))
+                if dialog.exec_():
+                    if dialog.action == dialog.actionDetalle:
+                        puesto = self.positionQuery(SELECT="*", QUERY=" AND name == '{}'".format(name))[0]
+                        dialogNewPuesto = DialogPuestoLayout(False, False)
+                        dialogNewPuesto.nombreLineEdit.setText(puesto[1])
+                        dialogNewPuesto.salarioDoubleSpinBox.setValue(puesto[2])
+                        dialogNewPuesto.porCientoVentaSpinBox.setValue(10)
+                        dialogNewPuesto.gastosAdicionalesDoubleSpinBox.setValue(puesto[3])
+                        for i in puesto[4]:
+                            if i == "L":
+                                dialogNewPuesto.lPushButton.setStyleSheet(dialogNewPuesto.day("l".upper()))
+                            elif i == "M":
+                                dialogNewPuesto.mPushButton.setStyleSheet(dialogNewPuesto.day("m".upper()))
+                            elif i == "X":
+                                dialogNewPuesto.xPushButton.setStyleSheet(dialogNewPuesto.day("x".upper()))
+                            elif i == "J":
+                                dialogNewPuesto.jPushButton.setStyleSheet(dialogNewPuesto.day("j".upper()))
+                            elif i == "V":
+                                dialogNewPuesto.vPushButton.setStyleSheet(dialogNewPuesto.day("v".upper()))
+                            elif i == "S":
+                                dialogNewPuesto.sPushButton.setStyleSheet(dialogNewPuesto.day("s".upper()))
+                            elif i == "D":
+                                dialogNewPuesto.dPushButton.setStyleSheet(dialogNewPuesto.day("d".upper()))
+                        dialogNewPuesto.categoriaComboBox.setCurrentText(puesto[5])
+
+                        dialogNewPuesto.desdeTimeEdit.setMinimumTime(QTime.fromString(puesto[6], "hh:mm"))
+                        dialogNewPuesto.desdeTimeEdit.setMaximumTime(QTime.fromString(puesto[6], "hh:mm"))
+                        dialogNewPuesto.hastaTimeEdit.setMinimumTime(QTime.fromString(puesto[7], "hh:mm"))
+                        dialogNewPuesto.hastaTimeEdit.setMaximumTime(QTime.fromString(puesto[7], "hh:mm"))
+
+                        for i in self.queryFree(SELECT="ai.code, i.name, ai.qty",
+                                                FROM="AssignedInvertion ai, Invertion i",
+                                                QUERY="ai.idPosition == {} "
+                                                      "AND ai.idInvertion == i.id "
+                                                      "GROUP BY ai.id".
+                                                        format(puesto[0])):
+                            dialogNewPuesto.puesto.activos.append([i[0], i[1], i[2]])
+                        dialogNewPuesto.loadTabla()
+
+                        dialogNewPuesto.nombreLineEdit.setReadOnly(True)
+                        dialogNewPuesto.salarioDoubleSpinBox.setReadOnly(True)
+                        dialogNewPuesto.porCientoVentaSpinBox.setReadOnly(True)
+                        dialogNewPuesto.gastosAdicionalesDoubleSpinBox.setReadOnly(True)
+                        dialogNewPuesto.activosAddPushButton.hide()
+                        dialogNewPuesto.okPushButton.hide()
+                        dialogNewPuesto.setWindowTitle("Puesto")
+
+                        dialogNewPuesto.exec_()
+                    elif dialog.action == dialog.actionAdd:
+                        self.item = item
+                        self.accept()
+            elif self.opcion == self.opcionAsignarTrabajador:
+                name = item.text(1)
+                lastname = item.text(2)
+                dialog = DialogOpcionLayout(("Detalle", "Add"))
+                if dialog.exec_():
+                    if dialog.action == dialog.actionDetalle:
+                        workerQ = self.workerQuery(
+                            SELECT="name, lastname, ci, street, city, state, phone, phoneOther, mobil, mobilOther, email, categoria",
+                            QUERY=" AND name == '{}' AND lastname == '{}'".format(name, lastname))[0]
+                        worker = DialogNewWorkerLayout()
+                        worker.nombreLineEdit.setText(workerQ[0])
+                        worker.apellidosLineEdit.setText(workerQ[1])
+                        worker.cILineEdit.setText(workerQ[2])
+                        worker.calleLineEdit.setText(workerQ[3])
+                        worker.municipioLineEdit.setText(workerQ[4])
+                        worker.provinciaLineEdit.setText(workerQ[5])
+                        worker.casaLineEdit.setText(workerQ[6])
+                        worker.otroCasaLineEdit.setText(workerQ[7])
+                        worker.movilLineEdit.setText(workerQ[8])
+                        worker.otroMovilLineEdit.setText(workerQ[9])
+                        worker.emailLineEdit.setText(workerQ[10])
+                        worker.categoriaComboBox.setCurrentText(workerQ[11])
+
+                        if dialog.action == dialog.actionDetalle:
+                            worker.nombreLineEdit.setReadOnly(True)
+                            worker.apellidosLineEdit.setReadOnly(True)
+                            worker.cILineEdit.setReadOnly(True)
+                            worker.calleLineEdit.setReadOnly(True)
+                            worker.municipioLineEdit.setReadOnly(True)
+                            worker.provinciaLineEdit.setReadOnly(True)
+                            worker.casaLineEdit.setReadOnly(True)
+                            worker.otroCasaLineEdit.setReadOnly(True)
+                            worker.movilLineEdit.setReadOnly(True)
+                            worker.otroMovilLineEdit.setReadOnly(True)
+                            worker.emailLineEdit.setReadOnly(True)
+
+                            worker.okPushButton.hide()
+
+                            worker.exec_()
+                    elif dialog.action == dialog.actionAdd:
+                        self.item = item
+                        self.accept()
 
         def add(self):
-            if self.opcionTrabajadores == self.opcion:
+            if self.opcionTrabajadores == self.opcion or self.opcionAsignarTrabajador == self.opcion:
                 dialog = DialogNewWorkerLayout()
                 if dialog.exec_():
                     self.buscar(txt="")
-            elif self.opcionPuesto == self.opcion:
+            elif self.opcionPuesto == self.opcion or self.opcionAsignarPuesto == self.opcion:
                 dialog = DialogPuestoLayout()
+                if dialog.exec_():
+                    self.buscar(txt="")
+            elif self.opcionAreaTrabajo == self.opcion:
+                dialog = DialogAreasTrabajo()
                 if dialog.exec_():
                     self.buscar(txt="")
 
@@ -4163,7 +4352,108 @@ if sys.version == '3.6.0 |Anaconda 4.3.1 (64-bit)| (default, Dec 23 2016, 11:57:
 
         def d(self):
             self.dPushButton.setStyleSheet(self.day("d".upper()))
-    # <> DialogPuestoLayout
+    # <> fin DialogPuestoLayout
+
+
+    class DialogAreasTrabajo(QDialog, dialogAreasTrabajoUi, SQL):
+        def __init__(self, edit=True):
+            super(DialogAreasTrabajo, self).__init__()
+            self.setupUi(self)
+            SQL.__init__(self)
+
+            self.setWindowIcon(QIcon(os.path.join("system", "image", "icono.png")))
+
+            self.edit = edit
+            self.okPushButton.hide()
+            self.workspace = self.Workspace()
+
+            if not self.edit:
+                self.addPushButton.hide()
+
+            self.connection()
+
+        def connection(self):
+            self.addPushButton.clicked.connect(self.add)
+            self.okPushButton.clicked.connect(self.ok)
+            self.cancelarPushButton.clicked.connect(self.reject)
+            self.listaTreeWidget.itemDoubleClicked.connect(self.opcionesPuesto)
+            self.nombreLineEdit.textChanged.connect(self.mostrarOk)
+
+        def mostrarOk(self, txt):
+            if len(txt) >= 5 and self.edit:
+                self.okPushButton.show()
+            else:
+                self.okPushButton.hide()
+
+        def opcionesPuesto(self, item):
+            if self.edit:
+                count = 0
+                for i in self.workspace.puesto:
+                    if item.text(0) == i[0] and item.text(1) == i[1]:
+                        del self.workspace.puesto[count]
+                    count += 1
+                self.loadTabla()
+
+        def add(self):
+            header = ["Categoria", "Nombre", "Salario", "Ventas %"]
+            lista = self.positionQuery(SELECT="categoria, name, wage, expenses")
+            dialogList = DialogList(header, lista, opcion="Asignar Puesto")
+            dialogList.setWindowTitle("Asignar Puesto")
+            if len(lista) > 0:
+                if dialogList.exec_():
+
+                    itemPuesto = dialogList.item
+
+                    header = ["Categoria", "Nombre", "Apellidos", "CI", "Direccion", "Municipio", "Provincia",
+                              "Teléfono"]
+                    lista = self.workerQuery()
+                    dialogListTrabajador = DialogList(header, lista, opcion="Asignar Trabajador")
+                    dialogListTrabajador.setWindowTitle("Asignar Trabajador")
+                    dialogListTrabajador.puesto = itemPuesto.text(0)
+                    dialogListTrabajador.buscar(" ")
+                    if len(lista) > 0:
+                        if dialogListTrabajador.exec_():
+                            itemTrabajador = dialogListTrabajador.item
+
+                            self.workspace.puesto.append((itemPuesto.text(1), itemTrabajador.text(1), itemTrabajador.text(2)))
+                            self.loadTabla()
+                    else:
+                        dialogNewWorker = DialogNewWorkerLayout()
+                        if dialogNewWorker.exec_():
+                            QMessageBox.information(self, "Aviso", "Vuelva a Asignar el Puesto y el Trabajador")
+            else:
+                dialogNewPuesto = DialogPuestoLayout()
+                if dialogNewPuesto.exec_():
+                    self.add()
+
+        def ok(self):
+            if len(self.workspace.puesto) > 0:
+                self.workspace.nombre = self.nombreLineEdit.text()
+                if self.workspacesInsert(self.workspace):
+                    QMessageBox.information(self, "Aviso", "Área de trabajo creada correctamente :)")
+                    self.accept()
+            else:
+                QMessageBox.critical(self, "Error", "No se ha asignados trabajadores al área de trabajo")
+
+        def loadTabla(self):
+            self.listaTreeWidget.clear()
+            for i in self.workspace.puesto:
+                elem = []
+                for k in i:
+                    elem.append(str(k))
+                item = QTreeWidgetItem(elem)
+                self.listaTreeWidget.addTopLevelItem(item)
+
+        class Workspace:
+            nombre = ""
+            puesto = []
+
+            def get_sql(self):
+                return (self.nombre,)
+
+            def get_assigned(self):
+                return self.puesto
+    # <> fin DialogAreasTrabajo
 
 
     class InicioLayout(QDialog, inicioUi, SQL):
@@ -4220,6 +4510,8 @@ if sys.version == '3.6.0 |Anaconda 4.3.1 (64-bit)| (default, Dec 23 2016, 11:57:
                  "win": DialogActivosLayout(), "status": "administrador"},
                 {"image": "puestos.png", "action": "Puestos", "detalle": "Para crear puestos de trabajo",
                  "win": "Puestos", "status": "administrador"},
+                {"image": "areas trabajo.png", "action": "Areas de Trabajo", "detalle": "Para asignar trabajadores a los puestos",
+                 "win": "Areas Trabajo", "status": "administrador"},
                 )
 
             for i in self.action:
@@ -4523,6 +4815,17 @@ if sys.version == '3.6.0 |Anaconda 4.3.1 (64-bit)| (default, Dec 23 2016, 11:57:
                             else:
                                 dialogNewPuesto = DialogPuestoLayout()
                                 if dialogNewPuesto.exec_():
+                                    pass
+                        elif i["win"] == "Areas Trabajo":
+                            header = ["Nombre",]
+                            lista = self.workspacesQuery(SELECT="name")
+                            dialogList = DialogList(header, lista, opcion="Area Trabajo")
+                            dialogList.setWindowTitle("Areas de Trabajo")
+                            if len(lista) > 0:
+                                dialogList.exec_()
+                            else:
+                                dialogAreasTrabajo = DialogAreasTrabajo()
+                                if dialogAreasTrabajo.exec_():
                                     pass
                         else:
                             QMessageBox.information(self, "Información", "Esta opción no se encuentra disponible por ahora :(")

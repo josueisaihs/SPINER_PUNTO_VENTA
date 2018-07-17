@@ -1,0 +1,816 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Dialog</class>
+ <widget class="QDialog" name="Dialog">
+  <property name="windowModality">
+   <enum>Qt::ApplicationModal</enum>
+  </property>
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>420</width>
+    <height>430</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>420</width>
+    <height>430</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>420</width>
+    <height>430</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>Nuevo Puesto</string>
+  </property>
+  <property name="whatsThis">
+   <string/>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">QMainWindow, QDialog{
+                background-color: rgb(255, 255, 255);
+                }
+
+                /**** QPushButton (enabled) ****/
+                QPushButton
+                {
+                background-color: rgb(85, 170, 255);
+                font: 10pt;
+                color: rgb(255, 255, 255);
+                padding: 4px 8px;
+                border: 2px solid rgb(85, 170, 255);
+                border-radius: 8px;
+                padding: 5px;
+                }
+
+                QPushButton:hover
+                {
+                background-color: rgb(0, 121, 182);
+                border: 2px solid rgb(66, 133, 199);
+                }
+
+                QPushButton:pressed
+                {
+                border:3px solid rgb(66, 133, 199);
+                padding: -1px 1px 1px 1px;
+                }
+
+                /******* QLabel ***********/
+                QLabel{
+                color: rgb(120, 120, 120)
+                }
+                labelHab1:hover{
+                color: rgb(120, 0, 0)
+                }
+
+                /*******QLineEdit************/
+                QTextEdit {
+                font: 10pt;
+                color: rgb(120, 120, 120);
+                border: 1px solid rgb(156, 156, 156);
+                border-radius: 0px;
+                padding: 2px;
+                }
+                QLineEdit, QDateEdit, QDoubleSpinBox, QSpinBox{
+                font: 10pt;
+                color: rgb(120, 120, 120);
+                border: 1px solid rgb(156, 156, 156);
+                border-radius: 0px;
+                padding: 2px;
+                border-top: 1px white;
+                border-left: 1px white;
+                border-right: 1px white;
+                }
+                /********QComboBox*******/
+                QComboBox{
+                font: 10pt;
+                color: rgb(120, 120, 120);
+                border: 1px solid rgb(156, 156, 156);
+                padding: 2px;
+                selection-background-color: white;
+                selection-color: rgb(120, 120, 120);
+                border-top: 1px white;
+                border-left: 1px white;
+                border-right: 1px white;
+                }
+                QComboBox QAbstractItemView
+                {
+                background-color: white;
+                color:rgb(120, 120, 120);
+                padding: 4px;
+                border: 1px solid rgb(156, 156, 156);
+                border-top: 1px white;
+                border-left: 1px white;
+                border-right: 1px white;
+                }
+
+                QLineEdit:hover, QDateEdit:hover, QDoubleSpinBox:hover, QComboBox:hover
+                {
+                color: rgb(85, 170, 255);
+                border: 1px solid rgb(85, 170, 255);
+                border-top: 1px white;
+                border-left: 1px white;
+                border-right: 1px white;
+                }
+
+                QLineEdit:focus, QDateEdit:focus, QDoubleSpinBox:focus, QComboBox:focus
+                {
+                border-color: rgb(90,200,255);
+                border-top: 1px white;
+                border-left: 1px white;
+                border-right: 1px white;
+                }
+
+                QToolTip
+                {
+                background-color:rgb(85, 170, 255);
+                color: white;
+                border: 1px solid rgb(85, 170, 255);
+                opacity: 50;
+                padding: 1px;
+                }
+                QTabWidget
+                {
+                background-color: transparent;
+                }
+
+                QTabWidget::pane {
+                border-top: 1px solid rgb(156, 156, 156);
+                border-bottom: 1px solid rgb(156, 156, 156);
+                position: absolute;
+                top: -0.25em;
+                }
+                /**** QTabWidget (disabled) ****/
+                QTabWidget::pane:disabled
+                {
+                border-color: rgb(60,60,60);
+                }
+
+                QTabWidget::tab-bar {
+                alignment: center;
+                border: 1px white;
+                border-radius: 5px;
+                }
+
+                QTreeView
+                {
+                alternate-background-color: rgb(200,200,200);
+                background-color: white;
+                border: 1px solid rgb(156, 156, 156);
+                font: 10pt;
+                color: rgb(120,120,120);
+                selection-background-color:rgb(90,200,255);
+                selection-color: rgb(156, 156, 156);
+                }
+                QListView{
+                alternate-background-color: rgb(200,200,200);
+                background-color: white;
+                border: 1px solid rgb(255, 255, 255);
+                font: 8pt;
+                color: rgb(120,120,120);
+                selection-background-color:rgb(90,200,255);
+                selection-color: rgb(156, 156, 156);
+                }
+            </string>
+  </property>
+  <property name="modal">
+   <bool>true</bool>
+  </property>
+  <widget class="QWidget" name="formLayoutWidget">
+   <property name="geometry">
+    <rect>
+     <x>9</x>
+     <y>10</y>
+     <width>401</width>
+     <height>411</height>
+    </rect>
+   </property>
+   <layout class="QFormLayout" name="formLayout">
+    <item row="0" column="0">
+     <widget class="QLabel" name="nombreLabel">
+      <property name="text">
+       <string>Nombre</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="1">
+     <widget class="QLineEdit" name="nombreLineEdit"/>
+    </item>
+    <item row="1" column="0">
+     <widget class="QLabel" name="salarioLabel">
+      <property name="text">
+       <string>Salario</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="1">
+     <widget class="QDoubleSpinBox" name="salarioDoubleSpinBox">
+      <property name="maximum">
+       <double>20000.000000000000000</double>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="0">
+     <widget class="QLabel" name="gastosAdicionalesLabel">
+      <property name="text">
+       <string>Gastos Adicionales</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="1">
+     <widget class="QDoubleSpinBox" name="gastosAdicionalesDoubleSpinBox">
+      <property name="maximum">
+       <double>20000.000000000000000</double>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="0">
+     <widget class="QLabel" name="activosAsignadosLabel">
+      <property name="text">
+       <string>Asignados</string>
+      </property>
+     </widget>
+    </item>
+    <item row="8" column="1">
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <item>
+       <spacer name="horizontalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="okPushButton">
+        <property name="styleSheet">
+         <string notr="true">QPushButton
+                                        {
+                                        background-color: white;
+                                        font: 10pt;
+                                        color: rgb(67, 136, 101);
+                                        padding: 4px 8px;
+                                        border: 2px solid rgb(0, 170, 127);
+                                        border-bottom-right-radius: 0px;
+                                        border-bottom-left-radius: 0px;
+                                        border-top-right-radius: 0px;
+                                        border-top-left-radius: 0px;
+                                        }
+
+                                        :hover
+                                        {
+                                        background-color: rgb(0, 170, 127);
+                                        color: white;
+                                        border: 2px solid rgb(120, 200, 29);
+                                        }
+
+                                        :pressed
+                                        {
+                                        border:3px solid rgb(255, 255, 255);
+                                        padding: -1px 1px 1px 1px;
+                                        }
+                                    </string>
+        </property>
+        <property name="text">
+         <string>Ok</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="editarPushButton">
+        <property name="styleSheet">
+         <string notr="true">QPushButton
+                                        {
+                                        background-color: white;
+                                        font: 10pt;
+                                        color: rgb(67, 136, 101);
+                                        padding: 4px 8px;
+                                        border: 2px solid rgb(0, 170, 127);
+                                        border-bottom-right-radius: 0px;
+                                        border-bottom-left-radius: 0px;
+                                        border-top-right-radius: 0px;
+                                        border-top-left-radius: 0px;
+                                        }
+
+                                        :hover
+                                        {
+                                        background-color: rgb(0, 170, 127);
+                                        color: white;
+                                        border: 2px solid rgb(120, 200, 29);
+                                        }
+
+                                        :pressed
+                                        {
+                                        border:3px solid rgb(255, 255, 255);
+                                        padding: -1px 1px 1px 1px;
+                                        }
+                                    </string>
+        </property>
+        <property name="text">
+         <string>Editar</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="cancelarPushButton">
+        <property name="styleSheet">
+         <string notr="true">QPushButton{
+                                        background-color: white;
+                                        font: 10pt;
+                                        color: rgb(255, 86, 71);
+                                        padding: 4px 8px;
+                                        border: 2px solid rgb(217, 71, 60);
+                                        border-bottom-right-radius: 0px;
+                                        border-bottom-left-radius: 0px;
+                                        border-top-right-radius: 0px;
+                                        border-top-left-radius: 0px;
+                                        }
+
+                                        :hover{
+                                        background-color: rgb(217, 71, 60);
+                                        border: 2px solid rgb(255, 86, 71);
+                                        color: white;
+                                        }
+
+                                        :pressed{
+                                        border:3px solid rgb(255, 255, 255);
+                                        padding: -1px 1px 1px 1px;
+                                        }
+                                    </string>
+        </property>
+        <property name="text">
+         <string>Cancelar</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="4" column="0">
+     <widget class="QLabel" name="diasLaboralesLabel">
+      <property name="text">
+       <string>Dias Laborales</string>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="1">
+     <layout class="QHBoxLayout" name="horizontalLayout_3">
+      <item>
+       <widget class="QPushButton" name="lPushButton">
+        <property name="styleSheet">
+         <string notr="true">QPushButton
+                                        {
+                                        background-color: white;
+                                        font: 10pt;
+                                        color: rgb(127, 127, 127);
+                                        padding: 4px 8px;
+                                        border: 2px solid rgb(150, 150, 150);
+                                        border-bottom-right-radius: 0px;
+                                        border-bottom-left-radius: 0px;
+                                        border-top-right-radius: 0px;
+                                        border-top-left-radius: 0px;
+                                        }
+
+                                        :hover
+                                        {
+                                        background-color: rgb(100, 100, 100);
+                                        color: white;
+                                        border: 2px solid rgb(100, 100, 100);
+                                        }
+
+                                        :pressed
+                                        {
+                                        border:3px solid rgb(255, 255, 255);
+                                        padding: -1px 1px 1px 1px;
+                                        }
+                                    </string>
+        </property>
+        <property name="text">
+         <string>L</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="mPushButton">
+        <property name="styleSheet">
+         <string notr="true">QPushButton
+                                        {
+                                        background-color: white;
+                                        font: 10pt;
+                                        color: rgb(127, 127, 127);
+                                        padding: 4px 8px;
+                                        border: 2px solid rgb(150, 150, 150);
+                                        border-bottom-right-radius: 0px;
+                                        border-bottom-left-radius: 0px;
+                                        border-top-right-radius: 0px;
+                                        border-top-left-radius: 0px;
+                                        }
+
+                                        :hover
+                                        {
+                                        background-color: rgb(100, 100, 100);
+                                        color: white;
+                                        border: 2px solid rgb(100, 100, 100);
+                                        }
+
+                                        :pressed
+                                        {
+                                        border:3px solid rgb(255, 255, 255);
+                                        padding: -1px 1px 1px 1px;
+                                        }
+                                    </string>
+        </property>
+        <property name="text">
+         <string>M</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="xPushButton">
+        <property name="styleSheet">
+         <string notr="true">QPushButton
+                                        {
+                                        background-color: white;
+                                        font: 10pt;
+                                        color: rgb(127, 127, 127);
+                                        padding: 4px 8px;
+                                        border: 2px solid rgb(150, 150, 150);
+                                        border-bottom-right-radius: 0px;
+                                        border-bottom-left-radius: 0px;
+                                        border-top-right-radius: 0px;
+                                        border-top-left-radius: 0px;
+                                        }
+
+                                        :hover
+                                        {
+                                        background-color: rgb(100, 100, 100);
+                                        color: white;
+                                        border: 2px solid rgb(100, 100, 100);
+                                        }
+
+                                        :pressed
+                                        {
+                                        border:3px solid rgb(255, 255, 255);
+                                        padding: -1px 1px 1px 1px;
+                                        }
+                                    </string>
+        </property>
+        <property name="text">
+         <string>X</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="jPushButton">
+        <property name="styleSheet">
+         <string notr="true">QPushButton
+                                        {
+                                        background-color: white;
+                                        font: 10pt;
+                                        color: rgb(127, 127, 127);
+                                        padding: 4px 8px;
+                                        border: 2px solid rgb(150, 150, 150);
+                                        border-bottom-right-radius: 0px;
+                                        border-bottom-left-radius: 0px;
+                                        border-top-right-radius: 0px;
+                                        border-top-left-radius: 0px;
+                                        }
+
+                                        :hover
+                                        {
+                                        background-color: rgb(100, 100, 100);
+                                        color: white;
+                                        border: 2px solid rgb(100, 100, 100);
+                                        }
+
+                                        :pressed
+                                        {
+                                        border:3px solid rgb(255, 255, 255);
+                                        padding: -1px 1px 1px 1px;
+                                        }
+                                    </string>
+        </property>
+        <property name="text">
+         <string>J</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="vPushButton">
+        <property name="styleSheet">
+         <string notr="true">QPushButton
+                                        {
+                                        background-color: white;
+                                        font: 10pt;
+                                        color: rgb(127, 127, 127);
+                                        padding: 4px 8px;
+                                        border: 2px solid rgb(150, 150, 150);
+                                        border-bottom-right-radius: 0px;
+                                        border-bottom-left-radius: 0px;
+                                        border-top-right-radius: 0px;
+                                        border-top-left-radius: 0px;
+                                        }
+
+                                        :hover
+                                        {
+                                        background-color: rgb(100, 100, 100);
+                                        color: white;
+                                        border: 2px solid rgb(100, 100, 100);
+                                        }
+
+                                        :pressed
+                                        {
+                                        border:3px solid rgb(255, 255, 255);
+                                        padding: -1px 1px 1px 1px;
+                                        }
+                                    </string>
+        </property>
+        <property name="text">
+         <string>V</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="sPushButton">
+        <property name="styleSheet">
+         <string notr="true">QPushButton
+                                        {
+                                        background-color: white;
+                                        font: 10pt;
+                                        color: rgb(127, 127, 127);
+                                        padding: 4px 8px;
+                                        border: 2px solid rgb(150, 150, 150);
+                                        border-bottom-right-radius: 0px;
+                                        border-bottom-left-radius: 0px;
+                                        border-top-right-radius: 0px;
+                                        border-top-left-radius: 0px;
+                                        }
+
+                                        :hover
+                                        {
+                                        background-color: rgb(100, 100, 100);
+                                        color: white;
+                                        border: 2px solid rgb(100, 100, 100);
+                                        }
+
+                                        :pressed
+                                        {
+                                        border:3px solid rgb(255, 255, 255);
+                                        padding: -1px 1px 1px 1px;
+                                        }
+                                    </string>
+        </property>
+        <property name="text">
+         <string>S</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="dPushButton">
+        <property name="styleSheet">
+         <string notr="true">QPushButton
+                                        {
+                                        background-color: white;
+                                        font: 10pt;
+                                        color: rgb(127, 127, 127);
+                                        padding: 4px 8px;
+                                        border: 2px solid rgb(150, 150, 150);
+                                        border-bottom-right-radius: 0px;
+                                        border-bottom-left-radius: 0px;
+                                        border-top-right-radius: 0px;
+                                        border-top-left-radius: 0px;
+                                        }
+
+                                        :hover
+                                        {
+                                        background-color: rgb(100, 100, 100);
+                                        color: white;
+                                        border: 2px solid rgb(100, 100, 100);
+                                        }
+
+                                        :pressed
+                                        {
+                                        border:3px solid rgb(255, 255, 255);
+                                        padding: -1px 1px 1px 1px;
+                                        }
+                                    </string>
+        </property>
+        <property name="text">
+         <string>D</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="6" column="1">
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QPushButton" name="activosAddPushButton">
+          <property name="styleSheet">
+           <string notr="true">QPushButton
+                                        {
+                                        background-color: white;
+                                        font: 10pt;
+                                        color: rgb(67, 136, 101);
+                                        padding: 4px 8px;
+                                        border: 2px solid rgb(0, 170, 127);
+                                        border-bottom-right-radius: 0px;
+                                        border-bottom-left-radius: 0px;
+                                        border-top-right-radius: 0px;
+                                        border-top-left-radius: 0px;
+                                        }
+
+                                        :hover
+                                        {
+                                        background-color: rgb(0, 170, 127);
+                                        color: white;
+                                        border: 2px solid rgb(120, 200, 29);
+                                        }
+
+                                        :pressed
+                                        {
+                                        border:3px solid rgb(255, 255, 255);
+                                        padding: -1px 1px 1px 1px;
+                                        }
+                                    </string>
+          </property>
+          <property name="text">
+           <string>+</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QTreeWidget" name="treeWidget">
+        <attribute name="headerDefaultSectionSize">
+         <number>100</number>
+        </attribute>
+        <attribute name="headerStretchLastSection">
+         <bool>true</bool>
+        </attribute>
+        <column>
+         <property name="text">
+          <string>Codigo</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Producto</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Cantidad</string>
+         </property>
+        </column>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="5" column="0">
+     <widget class="QLabel" name="horarioLabel">
+      <property name="text">
+       <string>Horario</string>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="1">
+     <layout class="QHBoxLayout" name="horizontalLayout_4">
+      <item>
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>Desde:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QTimeEdit" name="desdeTimeEdit">
+        <property name="maximumTime">
+         <time>
+          <hour>22</hour>
+          <minute>59</minute>
+          <second>59</second>
+         </time>
+        </property>
+        <property name="displayFormat">
+         <string>H:mm</string>
+        </property>
+        <property name="calendarPopup">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>Hasta:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QTimeEdit" name="hastaTimeEdit">
+        <property name="minimumTime">
+         <time>
+          <hour>1</hour>
+          <minute>0</minute>
+          <second>0</second>
+         </time>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="7" column="1">
+     <widget class="QComboBox" name="categoriaComboBox">
+      <item>
+       <property name="text">
+        <string>A</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>B</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>C</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item row="7" column="0">
+     <widget class="QLabel" name="categoriaLabel">
+      <property name="text">
+       <string>Categoria</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="0">
+     <widget class="QLabel" name="porCientoVentaLabel">
+      <property name="text">
+       <string>Por Ciento Venta</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="1">
+     <widget class="QSpinBox" name="porCientoVentaSpinBox">
+      <property name="suffix">
+       <string> %</string>
+      </property>
+      <property name="maximum">
+       <number>50</number>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <tabstops>
+  <tabstop>nombreLineEdit</tabstop>
+  <tabstop>salarioDoubleSpinBox</tabstop>
+  <tabstop>porCientoVentaSpinBox</tabstop>
+  <tabstop>gastosAdicionalesDoubleSpinBox</tabstop>
+  <tabstop>lPushButton</tabstop>
+  <tabstop>mPushButton</tabstop>
+  <tabstop>xPushButton</tabstop>
+  <tabstop>jPushButton</tabstop>
+  <tabstop>vPushButton</tabstop>
+  <tabstop>sPushButton</tabstop>
+  <tabstop>dPushButton</tabstop>
+  <tabstop>desdeTimeEdit</tabstop>
+  <tabstop>hastaTimeEdit</tabstop>
+  <tabstop>activosAddPushButton</tabstop>
+  <tabstop>categoriaComboBox</tabstop>
+  <tabstop>treeWidget</tabstop>
+  <tabstop>okPushButton</tabstop>
+  <tabstop>cancelarPushButton</tabstop>
+ </tabstops>
+ <resources/>
+ <connections/>
+</ui>
