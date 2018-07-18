@@ -246,6 +246,40 @@
     </item>
     <item>
      <widget class="QPushButton" name="printPushButton">
+      <property name="styleSheet">
+       <string notr="true">  QPushButton
+                {
+                background-color: rgb(255, 255, 255);
+                font: 9pt;
+                color: rgb(85, 170, 255);
+                padding: 4px 8px;
+                border: 2px solid rgb(255, 255, 255);
+                border-radius: 0px;
+                padding: 5px;
+                border-top: 1px white;
+                border-left: 1px white;
+                border-right: 1px white;
+                }
+
+                QPushButton:hover
+                {
+                border: 2px solid rgb(85, 170, 255);
+                font: 9pt;
+                border-top: 1px white;
+                border-left: 1px white;
+                border-right: 1px white;
+                }
+
+                QPushButton:pressed
+                {
+                font: 9pt;
+                border:3px solid rgb(85, 170, 255);
+                padding: 5px 5px 5px 5px;
+                border-top: 1px white;
+                border-left: 1px white;
+                border-right: 1px white;
+                }</string>
+      </property>
       <property name="text">
        <string>Imprimir</string>
       </property>
@@ -253,6 +287,40 @@
     </item>
     <item>
      <widget class="QPushButton" name="cancelPushButton">
+      <property name="styleSheet">
+       <string notr="true">QPushButton
+                {
+                background-color: rgb(255, 255, 255);
+                font: 9pt;
+                color: rgb(255, 86, 71);;
+                padding: 4px 8px;
+                border: 2px solid rgb(255, 255, 255);
+                border-radius: 0px;
+                padding: 5px;
+                border-top: 1px white;
+                border-left: 1px white;
+                border-right: 1px white;
+                }
+
+                QPushButton:hover
+                {
+                border: 2px solid rgb(255, 86, 71);
+                font: 9pt;
+                border-top: 1px white;
+                border-left: 1px white;
+                border-right: 1px white;
+                }
+
+                QPushButton:pressed
+                {
+                font: 9pt;
+                border:3px solid rgb(255, 86, 71);
+                padding: 5px 5px 5px 5px;
+                border-top: 1px white;
+                border-left: 1px white;
+                border-right: 1px white;
+                }</string>
+      </property>
       <property name="text">
        <string>Cancelar</string>
       </property>

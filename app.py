@@ -366,6 +366,11 @@ if sys.version == '3.6.0 |Anaconda 4.3.1 (64-bit)| (default, Dec 23 2016, 11:57:
 
             return self.db0.fetchall()
 
+        def deleteFree(self, FROM="", QUERY=""):
+            # print("SELECT {} FROM {} WHERE {}".format(SELECT, FROM, QUERY))
+            self.db0.execute("DELETE FROM {} WHERE {}".format(FROM, QUERY))
+            self.commit()
+
         def userQuery(self, SELECT="id", QUERY=""):
             self.db0.execute("SELECT {} FROM Users WHERE id != 0 {}".format(SELECT, QUERY))
             return self.db0.fetchall()
@@ -570,6 +575,30 @@ if sys.version == '3.6.0 |Anaconda 4.3.1 (64-bit)| (default, Dec 23 2016, 11:57:
                 return self.db0.lastrowid != 0
             else:
                 return False
+
+        def workspaceUpdate(self, workspace, workspaceOld):
+            id_workspaceOld = self.workspacesQuery(SELECT="id",
+                                                   QUERY=" AND name == '{}'".format(workspaceOld))[0][0]
+
+            self.deleteFree(FROM="AssignedWorkspace", QUERY=" id_workspace == {}".format(id_workspaceOld))
+
+            try:
+                self.db0.execute("UPDATE Workspaces SET name = '{}' WHERE name == '{}'".format(workspace.get_sql(),
+                                                                                               workspaceOld))
+            except sql.OperationalError:
+                pass
+
+            position = []
+            for i in workspace.puesto:
+                id_position = self.positionQuery(SELECT="id", QUERY=" AND name == '{}'".format(i[0]))[0][0]
+                id_worker = self.workerQuery(SELECT="id", QUERY=" AND name == '{}' AND lastname == '{}'".
+                                             format(i[1], i[2]))[0][0]
+                position.append([id_workspaceOld, id_position, id_worker])
+
+            self.db0.executemany("INSERT OR IGNORE INTO AssignedWorkspace(id_workspace, id_position, id_worker) "
+                                 "VALUES(?, ?, ?)", position)
+            self.commit()
+
 
         def workspacesQuery(self, SELECT="", QUERY=""):
             self.db0.execute("SELECT {} FROM Workspaces WHERE id != 0 {}".format(SELECT, QUERY))
@@ -3267,7 +3296,7 @@ if sys.version == '3.6.0 |Anaconda 4.3.1 (64-bit)| (default, Dec 23 2016, 11:57:
             elif self.opcion == self.opcionTrabajadores:
                 name = item.text(1)
                 lastname = item.text(2)
-                dialog = DialogOpcionLayout(("Detalle", "Editar"))
+                dialog = DialogOpcionLayout(("Detalle", "Editar", "Eliminar",))
                 if dialog.exec_():
                     workerQ = self.workerQuery(
                         SELECT="name, lastname, ci, street, city, state, phone, phoneOther, mobil, mobilOther, email, categoria",
@@ -3310,9 +3339,22 @@ if sys.version == '3.6.0 |Anaconda 4.3.1 (64-bit)| (default, Dec 23 2016, 11:57:
                         worker.workerOld.lastname = lastname
                         if worker.exec_():
                             self.buscar("")
+                    elif dialog.action == dialog.actionEliminar:
+                        reply = QMessageBox.question(self,
+                                                     'Confirmación Eliminación',
+                                                     "¿Estás seguro que desea eliminar al Trabajador: {} {}?".
+                                                     format(name, lastname),
+                                                     QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+
+                        if reply == QMessageBox.Yes:
+                            id_worker = self.workerQuery(SELECT="id", QUERY=" AND name == '{}' AND lastname == '{}'".
+                                                         format(name, lastname))[0][0]
+                            self.deleteFree(FROM="Workers", QUERY="id == {}".format(id_worker))
+                            self.deleteFree(FROM="AssignedWorkspace", QUERY="id_worker == {}".format(id_worker))
+                            self.buscar("")
             elif self.opcion == self.opcionPuesto:
                 name = item.text(1)
-                dialog = DialogOpcionLayout(("Detalle",))
+                dialog = DialogOpcionLayout(("Detalle", "Eliminar"))
                 if dialog.exec_():
                     puesto = self.positionQuery(SELECT="*", QUERY=" AND name == '{}'".format(name))[0]
                     dialogNewPuesto = DialogPuestoLayout(False, False)
@@ -3380,15 +3422,26 @@ if sys.version == '3.6.0 |Anaconda 4.3.1 (64-bit)| (default, Dec 23 2016, 11:57:
                         dialogNewPuesto.hastaTimeEdit.setMaximumTime(QTime.fromString("23:59", "hh:mm"))
 
                         dialogNewPuesto.exec_()
-                    else:
-                        pass
+                    elif dialog.action == dialog.actionEliminar:
+                        reply = QMessageBox.question(self,
+                                                     'Confirmación Eliminación',
+                                                     "¿Estás seguro que desea eliminar el Puesto: {}?".
+                                                     format(name),
+                                                     QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+
+                        if reply == QMessageBox.Yes:
+                            id_position = self.positionQuery(SELECT="id", QUERY=" AND name == '{}'".format(name))[0][0]
+                            self.deleteFree(FROM="Position", QUERY="id == {}".format(id_position))
+                            self.deleteFree(FROM="AssignedWorkspace", QUERY="id_position == {}".format(id_position))
+                            self.buscar("")
             elif self.opcion == self.opcionAreaTrabajo:
                 name = item.text(0)
-                dialog = DialogOpcionLayout(("Detalle",))
+                dialog = DialogOpcionLayout(("Detalle", "Eliminar", "Editar"))
                 if dialog.exec_():
                     if dialog.action == dialog.actionDetalle:
                         dialogAreasTrabajo = DialogAreasTrabajo(edit=False)
                         dialogAreasTrabajo.nombreLineEdit.setText(name)
+                        dialogAreasTrabajo.nombreLineEdit.setReadOnly(True)
 
                         dialogAreasTrabajo.workspace.puesto = \
                             self.queryFree(SELECT="p.name, w.name, w.lastname",
@@ -3397,6 +3450,31 @@ if sys.version == '3.6.0 |Anaconda 4.3.1 (64-bit)| (default, Dec 23 2016, 11:57:
                                                  "AND s.id == a.id_workspace AND s.name == '{}'".format(name))
                         dialogAreasTrabajo.loadTabla()
                         dialogAreasTrabajo.exec_()
+                    elif dialog.action == dialog.actionEditar:
+                        dialogAreasTrabajo = DialogAreasTrabajo()
+                        dialogAreasTrabajo.nombreLineEdit.setText(name)
+                        dialogAreasTrabajo.workspaceOld = name
+                        dialogAreasTrabajo.okPushButton.setText("Editar")
+
+                        dialogAreasTrabajo.workspace.puesto = \
+                            self.queryFree(SELECT="p.name, w.name, w.lastname",
+                                           FROM="Position p, Workers w, Workspaces s, AssignedWorkspace a",
+                                           QUERY="a.id_position == p.id AND a.id_worker == w.id "
+                                                 "AND s.id == a.id_workspace AND s.name == '{}'".format(name))
+                        dialogAreasTrabajo.loadTabla()
+                        dialogAreasTrabajo.exec_()
+                    elif dialog.action == dialog.actionEliminar:
+                        reply = QMessageBox.question(self,
+                                                     'Confirmación Eliminación',
+                                                     "¿Estás seguro que desea eliminar el Área de Trabajo: {}?".
+                                                     format(name),
+                                                     QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+
+                        if reply == QMessageBox.Yes:
+                            id_workspace = self.workspacesQuery(SELECT="id", QUERY=" AND name == '{}'".format(name))[0][0]
+                            self.deleteFree(FROM="Workspaces", QUERY="id == {}".format(id_workspace))
+                            self.deleteFree(FROM="AssignedWorkspace", QUERY="id_workspace == {}".format(id_workspace))
+                            self.buscar("")
             elif self.opcion == self.opcionAsignarPuesto:
                 name = item.text(1)
                 dialog = DialogOpcionLayout(("Detalle", "Add"))
@@ -4366,6 +4444,7 @@ if sys.version == '3.6.0 |Anaconda 4.3.1 (64-bit)| (default, Dec 23 2016, 11:57:
             self.edit = edit
             self.okPushButton.hide()
             self.workspace = self.Workspace()
+            self.workspaceOld = ""
 
             if not self.edit:
                 self.addPushButton.hide()
@@ -4429,8 +4508,13 @@ if sys.version == '3.6.0 |Anaconda 4.3.1 (64-bit)| (default, Dec 23 2016, 11:57:
         def ok(self):
             if len(self.workspace.puesto) > 0:
                 self.workspace.nombre = self.nombreLineEdit.text()
-                if self.workspacesInsert(self.workspace):
-                    QMessageBox.information(self, "Aviso", "Área de trabajo creada correctamente :)")
+                if self.okPushButton.text() != "Editar":
+                    if self.workspacesInsert(self.workspace):
+                        QMessageBox.information(self, "Aviso", "Área de trabajo creada correctamente :)")
+                        self.accept()
+                else:
+                    self.workspaceUpdate(self.workspace, self.workspaceOld)
+                    QMessageBox.information(self, "Aviso", "Área de trabajo editada correctamente :)")
                     self.accept()
             else:
                 QMessageBox.critical(self, "Error", "No se ha asignados trabajadores al área de trabajo")
