@@ -616,6 +616,19 @@ if sys.version == '3.6.0 |Anaconda 4.3.1 (64-bit)| (default, Dec 23 2016, 11:57:
 
             return self.db0.lastrowid != 0
 
+        def expensesUpdate(self, gasto, gastoOld):
+            gasto.frecuencia = self.programmedQuery(SELECT="id", QUERY=" AND programmed == '{}'".
+                                                    format(gasto.frecuencia))[0][0]
+            self.db0.execute("UPDATE Expenses SET name = '{}', haber = {}, fecha = '{}', id_programmed = {} "
+                             "WHERE name == '{}'".format(gasto.nombre, gasto.haber, gasto.fecha, gasto.frecuencia,
+                                                         gastoOld))
+            self.commit()
+
+        def expensesQuery(self, SELECT="p.programmed, e.name", QUERY=""):
+            self.db0.execute("SELECT {} FROM Expenses e, Programmed p WHERE e.id_programmed == p.id {}".
+                             format(SELECT, QUERY))
+            return self.db0.fetchall()
+
         def eventInsert(self, event):
             self.db0.execute("INSERT INTO Events(id_user, event, operation) VALUES (?, ?, ?)", event)
 
@@ -1793,6 +1806,8 @@ if sys.version == '3.6.0 |Anaconda 4.3.1 (64-bit)| (default, Dec 23 2016, 11:57:
         haber = 0.0
         frecuencia = ""
         fecha = ""
+        gastosNoEditables = ("Salario", "Agua", "Electricidad", "Telefono", "Tributo", "Software",
+                             "Marketing", "Transporte")
 
         def get_sql(self):
             return self.nombre, self.haber, self.fecha, self.frecuencia
@@ -3110,6 +3125,7 @@ if sys.version == '3.6.0 |Anaconda 4.3.1 (64-bit)| (default, Dec 23 2016, 11:57:
             self.opcionAsignarTrabajador = "Asignar Trabajador"
             self.puesto = "*"
             self.opcionAsignarPuesto = "Asignar Puesto"
+            self.opcionGastos = "Gastos"
 
             self.header = header
             self.loadTabla(header, list)
@@ -3123,7 +3139,7 @@ if sys.version == '3.6.0 |Anaconda 4.3.1 (64-bit)| (default, Dec 23 2016, 11:57:
 
             add = [
                 self.opcionAreaTrabajo, self.opcionTrabajadores, self.opcionPuesto, self.opcionAsignarTrabajador,
-                self.opcionAsignarPuesto,
+                self.opcionAsignarPuesto, self.opcionGastos
             ]
 
             for i in add:
@@ -3142,7 +3158,7 @@ if sys.version == '3.6.0 |Anaconda 4.3.1 (64-bit)| (default, Dec 23 2016, 11:57:
             self.searchLineEdit.textChanged.connect(self.buscar)
             itemDoubleClicked = [
                 self.opcionCategoria, self.opcionProveedor, self.opcionTrabajadores, self.opcionPuesto,
-                self.opcionAsignarTrabajador, self.opcionAsignarPuesto, self.opcionAreaTrabajo
+                self.opcionAsignarTrabajador, self.opcionAsignarPuesto, self.opcionAreaTrabajo, self.opcionGastos
             ]
             for i in itemDoubleClicked:
                 if self.opcion == i:
@@ -3261,6 +3277,19 @@ if sys.version == '3.6.0 |Anaconda 4.3.1 (64-bit)| (default, Dec 23 2016, 11:57:
                                                  QUERY=" AND lower(name) GLOB '*{}*'".format(text))
                 else:
                     lista = self.workspacesQuery(SELECT="name")
+                self.loadTabla(self.header, lista)
+            elif self.opcion == self.opcionGastos:
+                if len(txt) > 0:
+                    text = txt[0].lower()
+                    lista = self.expensesQuery(SELECT="p.programmed, e.name",
+                                               QUERY=" AND ("
+                                                     "lower(e.name) GLOB '*{txt}*' OR lower(p.programmed) GLOB '*{txt}*'"
+                                                     ")".format(txt=text))
+                else:
+                    lista = self.expensesQuery(SELECT="p.programmed, e.name",
+                                               QUERY=" AND ("
+                                                     "lower(e.name) GLOB '*' OR lower(p.programmed) GLOB '*'"
+                                                     ")")
                 self.loadTabla(self.header, lista)
 
         def opciones(self, item):
@@ -3595,6 +3624,70 @@ if sys.version == '3.6.0 |Anaconda 4.3.1 (64-bit)| (default, Dec 23 2016, 11:57:
                     elif dialog.action == dialog.actionAdd:
                         self.item = item
                         self.accept()
+            elif self.opcion == self.opcionGastos:
+                name = item.text(1)
+                dialog = DialogOpcionLayout(("Detalle", "Eliminar", "Editar"))
+                if dialog.exec_():
+                    expenses = self.expensesQuery(SELECT="p.programmed, e.name, e.haber, e.fecha",
+                                                  QUERY=" AND e.name == '{}'".format(name))[0]
+                    if dialog.action == dialog.actionDetalle:
+                        dialogGastos = DialogGastos(edit=False, frecuencia_=expenses[0])
+                        dialogGastos.nombreLineEdit.setText(expenses[1])
+                        dialogGastos.nombreLineEdit.setReadOnly(True)
+                        dialogGastos.haberDoubleSpinBox.setValue(expenses[2])
+                        dialogGastos.haberDoubleSpinBox.setReadOnly(True)
+                        if expenses[0] == "Mensualmente":
+                            dialogGastos.frecuenciaSpinBox.setValue(expenses[3])
+                            dialogGastos.frecuenciaSpinBox.setReadOnly(True)
+                            dialogGastos.calendarWidget.hide()
+                        elif expenses[0] == "Eventualmente":
+                            dialogGastos.frecuenciaSpinBox.hide()
+                            year, month, day = expenses[3].split("-")
+                            dialogGastos.calendarWidget.setSelectionMode(0)
+                            dialogGastos.calendarWidget.setSelectedDate(datetime.date(year=int(year),
+                                                                                      month=int(month),
+                                                                                      day=int(day)))
+                        dialogGastos.exec_()
+                    elif dialog.action == dialog.actionEditar:
+                        gastos = Gastos()
+                        dialogGastos = DialogGastos(edit=True, frecuencia_=expenses[0])
+                        dialogGastos.okPushButton.setText("Editar")
+                        dialogGastos.nombreLineEdit.setText(expenses[1])
+                        dialogGastos.gastoOld = expenses[1]
+                        if name in gastos.gastosNoEditables:
+                            dialogGastos.nombreLineEdit.setReadOnly(True)
+                        dialogGastos.haberDoubleSpinBox.setValue(expenses[2])
+                        if expenses[0] == "Mensualmente":
+                            dialogGastos.frecuenciaSpinBox.setValue(expenses[3])
+                            dialogGastos.calendarWidget.hide()
+                        elif expenses[0] == "Eventualmente":
+                            dialogGastos.frecuenciaSpinBox.hide()
+                            year, month, day = expenses[3].split("-")
+                            dialogGastos.calendarWidget.setSelectedDate(datetime.date(year=int(year),
+                                                                                      month=int(month),
+                                                                                      day=int(day)))
+                        if dialogGastos.exec_():
+                            self.buscar("")
+                    elif dialog.action == dialog.actionEliminar:
+                        gastos = Gastos()
+                        if name in gastos.gastosNoEditables:
+                            QMessageBox.information(self, "Aviso", "El Gasto : {} no se puede eliminar".format(name))
+                        else:
+                            reply = QMessageBox.question(self,
+                                                         'Confirmación Eliminación',
+                                                         "¿Estás seguro que desea eliminar el Gasto: {}?\n"
+                                                         "Esta operación eliminará todas las facturas asociadas a "
+                                                         "este gasto.\n"
+                                                         "Esta operación es irreversible.".
+                                                         format(name),
+                                                         QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+
+                            if reply == QMessageBox.Yes:
+                                id_expsenses = self.expensesQuery(SELECT="e.id", QUERY=" AND e.name == '{}'".
+                                                                  format(name))[0][0]
+                                self.deleteFree(FROM="ClassifyExpenses", QUERY="id_expense == {}".format(id_expsenses))
+                                self.deleteFree(FROM="Expenses", QUERY="id == {}".format(id_expsenses))
+                                self.buscar("")
 
         def add(self):
             if self.opcionTrabajadores == self.opcion or self.opcionAsignarTrabajador == self.opcion:
@@ -4565,22 +4658,26 @@ if sys.version == '3.6.0 |Anaconda 4.3.1 (64-bit)| (default, Dec 23 2016, 11:57:
 
 
     class DialogGastos(QDialog, dialogGastosUi, SQL):
-        def __init__(self):
+        def __init__(self, edit=True, frecuencia_="Eventualmente"):
             super(DialogGastos, self).__init__()
             self.setupUi(self)
             SQL.__init__(self)
             self.setWindowIcon(QIcon(os.path.join("system", "image", "icono.png")))
 
+            self.edit = edit
+            self.frecuencia_ = frecuencia_
+            self.gastoOld = ""
             self.connection()
 
             self.okPushButton.hide()
+            self.calendarWidget.setMinimumDate(datetime.date(year=2016, month=12, day=22))
             self.calendarWidget.setMaximumDate(datetime.date.today())
 
             self.frecuenciaComboBox.clear()
             for i in self.programmedQuery():
                 self.frecuenciaComboBox.addItems(i)
 
-            self.frecuenciaComboBox.setCurrentText("Eventualmente")
+            self.frecuenciaComboBox.setCurrentText(self.frecuencia_)
 
         def connection(self):
             self.okPushButton.clicked.connect(self.ok)
@@ -4589,7 +4686,7 @@ if sys.version == '3.6.0 |Anaconda 4.3.1 (64-bit)| (default, Dec 23 2016, 11:57:
             self.nombreLineEdit.textChanged.connect(self.mostrarOk)
 
         def mostrarOk(self, txt):
-            if len(txt) > 3:
+            if len(txt) > 3 and self.edit:
                 self.okPushButton.show()
             else:
                 self.okPushButton.hide()
@@ -4600,30 +4697,44 @@ if sys.version == '3.6.0 |Anaconda 4.3.1 (64-bit)| (default, Dec 23 2016, 11:57:
             gasto.nombre = self.nombreLineEdit.text()
             gasto.frecuencia = frecuencia
             gasto.haber = self.haberDoubleSpinBox.value()
-            if frecuencia == "Eventualmente":
-                fecha = self.calendarWidget.selectedDate()
-                gasto.fecha = datetime.date(year=fecha.year(), month=fecha.month(), day=fecha.day())
-            elif frecuencia == "Diariamente":
-                pass
-            elif frecuencia == "Mensualmente":
-                gasto.fecha = self.frecuenciaSpinBox.value()
+            if gasto.haber > 0:
+                if frecuencia == "Eventualmente":
+                    fecha = self.calendarWidget.selectedDate()
+                    gasto.fecha = datetime.date(year=fecha.year(), month=fecha.month(), day=fecha.day())
+                elif frecuencia == "Diariamente":
+                    pass
+                elif frecuencia == "Mensualmente":
+                    gasto.fecha = self.frecuenciaSpinBox.value()
 
-            if self.expensesInsert(gasto):
-                QMessageBox.information(self, "Aviso", "Gasto creado correctamente")
-                self.accept()
+                if self.okPushButton.text() != "Editar":
+                    if self.expensesInsert(gasto):
+                        QMessageBox.information(self, "Aviso", "Gasto creado correctamente")
+                        self.accept()
+                    else:
+                        QMessageBox.critical(self, "Error", "No se puedo crear el gasto")
+                else:
+                    try:
+                        self.expensesUpdate(gasto, self.gastoOld)
+                        QMessageBox.information(self, "Aviso", "Gasto editado correctamente")
+                        self.accept()
+                    except:
+                        QMessageBox.critical(self, "Error", "No se puedo editar el gasto")
             else:
-                QMessageBox.critical(self, "Error", "No se puedo crear el gasto")
+                QMessageBox.critical(self, "Error", "Debe asignarle un haber al Gasto")
 
         def frecuencia(self, i):
-            if i == "Eventualmente":
-                self.frecuenciaSpinBox.hide()
-                self.calendarWidget.show()
-            elif i == "Diariamente":
-                self.calendarWidget.hide()
-                self.frecuenciaSpinBox.hide()
-            elif i == "Mensualmente":
-                self.calendarWidget.hide()
-                self.frecuenciaSpinBox.show()
+            if self.edit:
+                if i == "Eventualmente":
+                    self.frecuenciaSpinBox.hide()
+                    self.calendarWidget.show()
+                elif i == "Diariamente":
+                    self.calendarWidget.hide()
+                    self.frecuenciaSpinBox.hide()
+                elif i == "Mensualmente":
+                    self.calendarWidget.hide()
+                    self.frecuenciaSpinBox.show()
+            else:
+                self.frecuenciaComboBox.setCurrentText(self.frecuencia_)
     # <> fin DialogGastos
 
 
@@ -5002,8 +5113,15 @@ if sys.version == '3.6.0 |Anaconda 4.3.1 (64-bit)| (default, Dec 23 2016, 11:57:
                                 if dialogAreasTrabajo.exec_():
                                     pass
                         elif i["win"] == "Gastos":
-                            dialogGastos = DialogGastos()
-                            dialogGastos.exec_()
+                            header = ["Frecuencia", "Nombre"]
+                            lista = self.expensesQuery()
+                            dialogList = DialogList(header, lista, opcion="Gastos")
+                            dialogList.setWindowTitle("Gastos")
+                            if len(lista) > 0:
+                                dialogList.exec_()
+                            else:
+                                dialogGastos = DialogGastos()
+                                dialogGastos.exec_()
                         else:
                             QMessageBox.information(self,
                                                     "Información",
