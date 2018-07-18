@@ -599,10 +599,22 @@ if sys.version == '3.6.0 |Anaconda 4.3.1 (64-bit)| (default, Dec 23 2016, 11:57:
                                  "VALUES(?, ?, ?)", position)
             self.commit()
 
-
         def workspacesQuery(self, SELECT="", QUERY=""):
             self.db0.execute("SELECT {} FROM Workspaces WHERE id != 0 {}".format(SELECT, QUERY))
             return self.db0.fetchall()
+
+        def programmedQuery(self, SELECT="programmed", QUERY=""):
+            self.db0.execute("SELECT {} FROM Programmed WHERE id != 0 {}".format(SELECT, QUERY))
+            return self.db0.fetchall()
+
+        def expensesInsert(self, gasto):
+            gasto.frecuencia = self.programmedQuery(SELECT="id", QUERY=" AND programmed == '{}'".
+                                                    format(gasto.frecuencia))[0][0]
+            self.db0.execute("INSERT OR IGNORE INTO Expenses (name, haber, fecha, id_programmed) VALUES (?, ?, ?, ?)",
+                             gasto.get_sql())
+            self.commit()
+
+            return self.db0.lastrowid != 0
 
         def eventInsert(self, event):
             self.db0.execute("INSERT INTO Events(id_user, event, operation) VALUES (?, ?, ?)", event)
@@ -905,6 +917,7 @@ if sys.version == '3.6.0 |Anaconda 4.3.1 (64-bit)| (default, Dec 23 2016, 11:57:
     dialogNewPuestoUi = uic.loadUiType(os.path.join("system", "layout", "dialogPuestos.ui"))[0]
     dialogKardexUi = uic.loadUiType(os.path.join("system", "layout", "dialogKardex.ui"))[0]
     dialogAreasTrabajoUi = uic.loadUiType(os.path.join("system", "layout", "dialogAsignacion.ui"))[0]
+    dialogGastosUi = uic.loadUiType(os.path.join("system", "layout", "dialogGastos.ui"))[0]
 
 
     class ProductDetalle:
@@ -1773,6 +1786,17 @@ if sys.version == '3.6.0 |Anaconda 4.3.1 (64-bit)| (default, Dec 23 2016, 11:57:
                         activos.append([i[1], self.id, 1, i[0]])
             self.activosSQL = activos
     # <> fin Puestos
+
+
+    class Gastos:
+        nombre = ""
+        haber = 0.0
+        frecuencia = ""
+        fecha = ""
+
+        def get_sql(self):
+            return self.nombre, self.haber, self.fecha, self.frecuencia
+    # <> fin Gastos
 
 
     class ElijoSoftSecureLayout(QDialog, dialogLicUi):
@@ -4540,6 +4564,69 @@ if sys.version == '3.6.0 |Anaconda 4.3.1 (64-bit)| (default, Dec 23 2016, 11:57:
     # <> fin DialogAreasTrabajo
 
 
+    class DialogGastos(QDialog, dialogGastosUi, SQL):
+        def __init__(self):
+            super(DialogGastos, self).__init__()
+            self.setupUi(self)
+            SQL.__init__(self)
+            self.setWindowIcon(QIcon(os.path.join("system", "image", "icono.png")))
+
+            self.connection()
+
+            self.okPushButton.hide()
+            self.calendarWidget.setMaximumDate(datetime.date.today())
+
+            self.frecuenciaComboBox.clear()
+            for i in self.programmedQuery():
+                self.frecuenciaComboBox.addItems(i)
+
+            self.frecuenciaComboBox.setCurrentText("Eventualmente")
+
+        def connection(self):
+            self.okPushButton.clicked.connect(self.ok)
+            self.cancelarPushButton.clicked.connect(self.reject)
+            self.frecuenciaComboBox.currentTextChanged.connect(self.frecuencia)
+            self.nombreLineEdit.textChanged.connect(self.mostrarOk)
+
+        def mostrarOk(self, txt):
+            if len(txt) > 3:
+                self.okPushButton.show()
+            else:
+                self.okPushButton.hide()
+
+        def ok(self):
+            frecuencia = self.frecuenciaComboBox.currentText()
+            gasto = Gastos()
+            gasto.nombre = self.nombreLineEdit.text()
+            gasto.frecuencia = frecuencia
+            gasto.haber = self.haberDoubleSpinBox.value()
+            if frecuencia == "Eventualmente":
+                fecha = self.calendarWidget.selectedDate()
+                gasto.fecha = datetime.date(year=fecha.year(), month=fecha.month(), day=fecha.day())
+            elif frecuencia == "Diariamente":
+                pass
+            elif frecuencia == "Mensualmente":
+                gasto.fecha = self.frecuenciaSpinBox.value()
+
+            if self.expensesInsert(gasto):
+                QMessageBox.information(self, "Aviso", "Gasto creado correctamente")
+                self.accept()
+            else:
+                QMessageBox.critical(self, "Error", "No se puedo crear el gasto")
+
+        def frecuencia(self, i):
+            if i == "Eventualmente":
+                self.frecuenciaSpinBox.hide()
+                self.calendarWidget.show()
+            elif i == "Diariamente":
+                self.calendarWidget.hide()
+                self.frecuenciaSpinBox.hide()
+            elif i == "Mensualmente":
+                self.calendarWidget.hide()
+                self.frecuenciaSpinBox.show()
+    # <> fin DialogGastos
+
+
     class InicioLayout(QDialog, inicioUi, SQL):
         def __init__(self, user):
             super(InicioLayout, self).__init__()
@@ -4596,6 +4683,8 @@ if sys.version == '3.6.0 |Anaconda 4.3.1 (64-bit)| (default, Dec 23 2016, 11:57:
                  "win": "Puestos", "status": "administrador"},
                 {"image": "areas trabajo.png", "action": "Areas de Trabajo", "detalle": "Para asignar trabajadores a los puestos",
                  "win": "Areas Trabajo", "status": "administrador"},
+                {"image": "gastos.png", "action": "Gastos", "detalle": "Para programar y gestionar gastos",
+                 "win": "Gastos", "status": "administrador"},
                 )
 
             for i in self.action:
@@ -4879,7 +4968,8 @@ if sys.version == '3.6.0 |Anaconda 4.3.1 (64-bit)| (default, Dec 23 2016, 11:57:
                             else:
                                 QMessageBox.information(self, "Aviso", "No existen existencias en el almacen")
                         elif i["win"] == "Trabajadores":
-                            header = ["Categoria", "Nombre", "Apellidos", "CI", "Direccion", "Municipio", "Provincia", "Teléfono"]
+                            header = ["Categoria", "Nombre", "Apellidos", "CI", "Direccion", "Municipio",
+                                      "Provincia", "Teléfono"]
                             lista = self.workerQuery()
                             dialogList = DialogList(header, lista, opcion="Trabajadores")
                             dialogList.setWindowTitle("Trabajadores")
@@ -4911,8 +5001,13 @@ if sys.version == '3.6.0 |Anaconda 4.3.1 (64-bit)| (default, Dec 23 2016, 11:57:
                                 dialogAreasTrabajo = DialogAreasTrabajo()
                                 if dialogAreasTrabajo.exec_():
                                     pass
+                        elif i["win"] == "Gastos":
+                            dialogGastos = DialogGastos()
+                            dialogGastos.exec_()
                         else:
-                            QMessageBox.information(self, "Información", "Esta opción no se encuentra disponible por ahora :(")
+                            QMessageBox.information(self,
+                                                    "Información",
+                                                    "Esta opción no se encuentra disponible por ahora :(")
 
         def listWidgetPickerDeudaDoubleClicked(self, item):
             text = item.text().split("\n")
